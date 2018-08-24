@@ -1,10 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-
 
 namespace AnsibleTower
 {
@@ -23,18 +19,19 @@ namespace AnsibleTower
 
     public class User
     {
-
-    public int id { get; set; }
-    public string type { get; set; }
-    public string url { get; set; }
-    public string created { get; set; }
-    public string username { get; set; }
-    public string first_name { get; set; }
-    public string last_name { get; set; }
-    public string email { get; set; }
-    public bool is_superuser { get; set; }
-    public string ldap_dn { get; set; }
-
+        public int id { get; set; }
+        public string type { get; set; }
+        public string url { get; set; }
+        //public string created { get; set; }
+        public string username { get; set; }
+        public string first_name { get; set; }
+        public string last_name { get; set; }
+        public string email { get; set; }
+        public bool is_superuser { get; set; }
+        public bool is_system_auditor { get; set; }
+        public string ldap_dn { get; set; }
+        public string external_account { get; set; }
+        public DateTime? created { get; set; }
     }
 
     public class Project
@@ -89,9 +86,16 @@ namespace AnsibleTower
     public class Job
     {
         public int id { get; set; }
+        public string type { get; set; }
+        public string url { get; set; }
         public string name { get; set; }
         public string description { get; set; }
-        //public object unified_job_template { get; set; }
+        public int unified_job_template { get; set; }
+        public string launch_type { get; set; }
+        public string status { get; set; }
+        public bool failed { get; set; }
+        public double elapsed { get; set; }
+        public string job_explanation { get; set; }
         public string job_type { get; set; }
         public object inventory { get; set; }
         public object project { get; set; }
@@ -103,7 +107,8 @@ namespace AnsibleTower
         public int verbosity { get; set; }
         public string extra_vars { get; set; }
         public string job_tags { get; set; }
-        //public object job_template { get; set; }
+        public int job_template { get; set; }
+        public string result_stdout { get; set; }
         public DateTime? started { get; set; }
         public DateTime? finished { get; set; }
     }
@@ -216,8 +221,5 @@ namespace AnsibleTower
             AnsibleTower.Group ConvertedObject = JsonConvert.DeserializeObject<AnsibleTower.Group>(JsonString);
             return ConvertedObject;
         }
-    
     }
-
-
 }
