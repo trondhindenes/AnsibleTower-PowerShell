@@ -4,19 +4,21 @@ $script:AnsibleCredential = $null;
 
 
 # Load Json
-$NewtonSoftJsonPath = join-path $PSScriptRoot "AnsibleTowerClasses\AnsibleTower\AnsibleTower\bin\Release\Newtonsoft.Json.dll"
-Add-Type -Path $NewtonSoftJsonPath
-
-# Compile the .net classes
-$ClassPath = Join-Path $PSScriptRoot "AnsibleTowerClasses\AnsibleTower\AnsibleTower\DataTypes.cs"
-$Code = Get-Content -Path $ClassPath -Raw
-Add-Type -TypeDefinition $Code -ReferencedAssemblies $NewtonSoftJsonPath
+if($PSVersionTable["PSEdition"] -eq "Core") {
+    $DllPath  = join-path $PSScriptRoot "bin\netstandard2.0\AnsibleTower.dll"
+} else {
+    $DllPath  = join-path $PSScriptRoot "bin\net45\AnsibleTower.dll"
+}
+Add-Type -Path $DllPath
 
 # Load the json parsers to have it handy whenever.
 $JsonParsers = New-Object AnsibleTower.JsonFunctions
 
 #D ot-source/Load the other powershell scripts
-Get-ChildItem "*.ps1" -path $PSScriptRoot | where {$_.Name -notmatch "test"} |  ForEach-Object { . $_.FullName }
+Get-ChildItem "*.ps1" -path $PSScriptRoot | where {$_.Name -notmatch "tests|Build|Default"} |  ForEach-Object { . $_.FullName }
+Get-ChildItem "*.ps1" -Path $PSScriptRoot/InternalFunctions | where {$_.Name -notmatch "tests"} |  ForEach-Object { . $_.FullName }
+Get-ChildItem "*.ps1" -Path $PSScriptRoot/ExportedFunctions | where {$_.Name -notmatch "tests"} |  ForEach-Object { . $_.FullName }
+
 
 function Disable-CertificateVerification
 {
@@ -82,10 +84,12 @@ function Get-AnsibleResourceUrl
     #>
     param(
         [Parameter(Mandatory=$true)]
-        [string]$Resource
+        [string]$Resource,
+        $AnsibleTower = $Global:DefaultAnsibleTower
     )
 
-    $result = Invoke-RestMethod -Uri $script:TowerApiUrl -Credential $script:AnsibleCredential;
+    $result = $AnsibleTower.Endpoints
+
     if (!$result) {
         throw "Failed to access the Tower api list";
     }
@@ -103,14 +107,19 @@ function Invoke-GetAnsibleInternalJsonResult
         $ItemType,
 
         $Id,
-        $ItemSubItem
+        $ItemSubItem,
+
+        $Filter = @{},
+
+        $AnsibleTower = $Global:DefaultAnsibleTower
     )
 
-    if (!$script:AnsibleUrl -or !$script:AnsibleCredential) {
+    $me = Test-AnsibleTower -AnsibleTower $AnsibleTower
+    if (!$me) {
         throw "You need to connect first, use Connect-AnsibleTower";
     }
 
-    $ItemApiUrl = Get-AnsibleResourceUrl $ItemType
+    $ItemApiUrl = Get-AnsibleResourceUrl $ItemType -AnsibleTower $AnsibleTower
 
     if ($id) {
         $ItemApiUrl = Join-AnsibleUrl $ItemApiUrl, $id
@@ -120,20 +129,18 @@ function Invoke-GetAnsibleInternalJsonResult
         $ItemApiUrl = Join-AnsibleUrl $ItemApiUrl, $ItemSubItem
     }
 
-    $params = @{
-        'Uri' = Join-AnsibleUrl $script:AnsibleUrl,$ItemApiUrl;
-        'Credential' = $script:AnsibleCredential;
-        'ErrorAction' = 'Stop';
-    }
-
-    Write-Verbose ("Invoke-GetAnsibleInternalJsonResult: Invoking url [{0}]" -f $params.Uri);
-    $invokeResult = Invoke-RestMethod @params;
-    if ($invokeResult.id) {
-        return $invokeResult
-    }
-    Elseif ($invokeResult.results) {
-        return $invokeResult.results
-    }
+    Write-Verbose ("Invoke-GetAnsibleInternalJsonResult: Invoking url [{0}]" -f $ItemApiUrl);
+    do {
+        $invokeResult = Invoke-AnsibleRequest -FullPath $ItemApiUrl -AnsibleTower $AnsibleTower -QueryParameters $Filter
+        if ($invokeResult.id) {
+            Write-Output $invokeResult
+        }
+        Elseif ($invokeResult.results) {
+            Write-Output $invokeResult.results
+        }
+        $ItemApiUrl = $InvokeResult.Next
+        $QS = $null
+    } while($ItemApiUrl)
 }
 
 Function Invoke-PostAnsibleInternalJsonResult
@@ -144,14 +151,16 @@ Function Invoke-PostAnsibleInternalJsonResult
 
         $itemId,
         $ItemSubItem,
-        $InputObject
-    )
+        $InputObject,
 
-    if (!$script:AnsibleUrl -or !$script:AnsibleCredential) {
+        $AnsibleTower = $Global:DefaultAnsibleTower
+    )
+    $me = Test-AnsibleTower -AnsibleTower $AnsibleTower
+    if (!$me) {
         throw "You need to connect first, use Connect-AnsibleTower";
     }
 
-    $ItemApiUrl = Get-AnsibleResourceUrl $ItemType
+    $ItemApiUrl = Get-AnsibleResourceUrl $ItemType -AnsibleTower $AnsibleTower
 
     if ($itemId) {
         $ItemApiUrl = Join-AnsibleUrl $ItemApiUrl, $itemId
@@ -160,19 +169,14 @@ Function Invoke-PostAnsibleInternalJsonResult
     if ($ItemSubItem) {
         $ItemApiUrl = Join-AnsibleUrl $ItemApiUrl, $ItemSubItem
     }
-    $params = @{
-        'Uri' = Join-AnsibleUrl $script:AnsibleUrl, $ItemApiUrl;
-        'Credential' = $script:AnsibleCredential;
-        'Method' = 'Post';
-        'ContentType' = 'application/json';
-        'ErrorAction' = 'Stop';
-    }
+    $Body = @{ }
     if ($InputObject) {
-        $params.Add("Body",($InputObject | ConvertTo-Json -Depth 99))
+        $Body["Body"] = $InputObject | ConvertTo-Json -Depth 99
     }
     
     Write-Verbose ("Invoke-PostAnsibleInternalJsonResult: Invoking url [{0}]" -f $params.Uri);
-    return Invoke-RestMethod @params
+    Invoke-AnsibleRequest -FullPath $ItemApiUrl -AnsibleTower $AnsibleTower -Method POST @Body
+    #return Invoke-RestMethod @params
 }
 
 Function Invoke-PutAnsibleInternalJsonResult
@@ -249,6 +253,12 @@ function Connect-AnsibleTower
         throw "Specify the URL without the /api part"    
     }
 
+    $ModuleConfig = Get-ModuleConfig
+    $Application = $ModuleConfig.Applications[$TowerUrl]
+    if(!$Application) {
+        throw "Please create an application in Ansible Tower and register it using Register-AnsibleTower"
+    }
+
     try
     {
         Write-Verbose "Determining current Tower API version url..."
@@ -266,19 +276,35 @@ function Connect-AnsibleTower
     }
     
 
+    $TokenUri = Join-AnsibleUrl $TowerUrl,'api','o','token'
+    $QueryParams = [System.Web.HttpUtility]::ParseQueryString("")
+    $QueryParams.Add("grant_type", "password")
+    $QueryParams.Add("client_id", $Application.client_id)
+    $QueryParams.Add("username", $Credential.Username)
+    $QueryParams.Add("password", $Credential.GetNetworkCredential().Password)
+    $QueryParams.Add("description", "PowerShell")
+    $QueryParams.Add("scope", "write")
+    $TokenUri = "${TokenUri}?$($QueryParams.ToString())"
+
     Write-Verbose "Logging in to Tower..."
-    try
-    {
-        $meUri = Join-AnsibleUrl $TowerApiUrl, 'me'
-        $meResult = Invoke-RestMethod -Uri $meUri -Credential $Credential -ErrorAction Stop;
-        if (!$meResult -or !$meResult.results) {
-            throw "Could not authenticate to Tower";
+    try {
+        $Token = Invoke-RestMethod -Uri $TokenUri -Method POST -ContentType "application/x-www-form-urlencoded"
+        $Tower = New-Object AnsibleTower.Tower -Property @{
+            AnsibleUrl = $TowerUrl
+            TowerApiUrl = $TowerApiUrl
+            Token = $Token
+            TokenExpiration = [DateTime]::Now.AddSeconds($Token.expires_in)
+            Me = $null
         }
-        $me = $JsonParsers.ParseToUser((ConvertTo-Json ($meResult.results | select -First 1)));
-    }
-    Catch
-    {
-        throw "Could not authenticate: " + $_.Exception.Message;
+        $Tower.Me = Test-AnsibleTower -AnsibleTower $Tower
+        $Endpoints = Invoke-AnsibleRequest -RelPath "/" -AnsibleTower $Tower
+        $Endpoints | Get-Member -MemberType NoteProperty | ForEach-object {
+            $Tower.Endpoints.Add($_.Name, $Endpoints."$($_.Name)")
+        }
+        #TODO: if ! -notdefault
+        $Global:DefaultAnsibleTower = $Tower
+    } catch {
+        Write-Error -Message ("Could not authenticate: " + $_.Exception.Message) -Exception $_.Exception
     }
 
     # Connection and login success.
@@ -287,5 +313,5 @@ function Connect-AnsibleTower
     $script:TowerApiUrl = $TowerApiUrl;
     $script:AnsibleCredential = $Credential;
 
-    return $me;
+    return $Tower;
 }
