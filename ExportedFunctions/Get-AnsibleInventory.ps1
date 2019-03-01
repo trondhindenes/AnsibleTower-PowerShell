@@ -2,9 +2,22 @@ function Get-AnsibleInventory
 {
     [CmdletBinding()]
     Param (
+        $Name,
+
         [Parameter(ValueFromPipelineByPropertyName=$true)]
-        [int]$id
+        [int]$id,
+
+        $AnsibleTower = $Global:DefaultAnsibleTower
     )
+
+    $Filter = @{}
+    if($PSBoundParameters.ContainsKey("Name")) {
+        if($Name.Contains("*")) {
+            $Filter["name__iregex"] = $Name.Replace("*", ".*")
+        } else {
+            $Filter["name"] = $Name
+        }
+    }
 
     if ($id)
     {
@@ -12,7 +25,7 @@ function Get-AnsibleInventory
     }
     Else
     {
-        $Return = Invoke-GetAnsibleInternalJsonResult -ItemType "inventory"
+        $Return = Invoke-GetAnsibleInternalJsonResult -ItemType "inventory" -Filter $Filter
     }
     
 
@@ -43,9 +56,8 @@ function Get-AnsibleInventory
             }
         }
 
-        $returnobj += $inventory; $inventory = $null
+        Write-Output $Inventory
+        $inventory = $null
 
     }
-    #return the things
-    $returnobj
 }
