@@ -7,7 +7,7 @@ $script:AnsibleCredential = $null;
 if($PSVersionTable["PSEdition"] -eq "Core") {
     $DllPath  = join-path $PSScriptRoot "bin\netstandard2.0\AnsibleTower.dll"
 } else {
-    $DllPath  = join-path $PSScriptRoot "bin\net45\AnsibleTower.dll"
+    $DllPath  = join-path $PSScriptRoot "bin\net452\AnsibleTower.dll"
 }
 Add-Type -Path $DllPath
 
