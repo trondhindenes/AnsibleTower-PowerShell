@@ -8,7 +8,6 @@ Function New-AnsibleOrganization
     {
         $myobj.description = $Description
     }
-    
 
     $result = Invoke-PostAnsibleInternalJsonResult -ItemType "organizations" -InputObject $myobj
     if ($result)
@@ -17,5 +16,4 @@ Function New-AnsibleOrganization
         $resultobj = $JsonParsers.ParseToOrganization($resultString)
         $resultobj
     }
-    
 }

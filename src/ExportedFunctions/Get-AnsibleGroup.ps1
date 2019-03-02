@@ -45,7 +45,6 @@ function Get-AnsibleGroup
     {
         $Return = Invoke-GetAnsibleInternalJsonResult -ItemType "groups" -AnsibleTower $AnsibleTower -Filter $Filter
     }
-    
 
     if (!($Return))
     {

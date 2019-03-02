@@ -28,19 +28,19 @@ function Disable-CertificateVerification
     #>
 
     # Danm you here-strings for messing up my indendation!!
-    Add-Type @" 
-    using System.Net; 
-    using System.Security.Cryptography.X509Certificates; 
-     
-    public class NoSSLCheckPolicy : ICertificatePolicy { 
-        public NoSSLCheckPolicy() {} 
-        public bool CheckValidationResult( 
-            ServicePoint sPoint, X509Certificate cert, 
-            WebRequest wRequest, int certProb) { 
-            return true; 
-        } 
-    } 
-"@ 
+    Add-Type @"
+    using System.Net;
+    using System.Security.Cryptography.X509Certificates;
+
+    public class NoSSLCheckPolicy : ICertificatePolicy {
+        public NoSSLCheckPolicy() {}
+        public bool CheckValidationResult(
+            ServicePoint sPoint, X509Certificate cert,
+            WebRequest wRequest, int certProb) {
+            return true;
+        }
+    }
+"@
     [System.Net.ServicePointManager]::CertificatePolicy = new-object NoSSLCheckPolicy
 }
 
@@ -173,7 +173,7 @@ Function Invoke-PostAnsibleInternalJsonResult
     if ($InputObject) {
         $Body["Body"] = $InputObject | ConvertTo-Json -Depth 99
     }
-    
+
     Write-Verbose ("Invoke-PostAnsibleInternalJsonResult: Invoking url [{0}]" -f $params.Uri);
     Invoke-AnsibleRequest -FullPath $ItemApiUrl -AnsibleTower $AnsibleTower -Method POST @Body
     #return Invoke-RestMethod @params
@@ -213,7 +213,7 @@ function Connect-AnsibleTower
     <#
     .SYNOPSIS
     Connects to the Tower API and returns the user details.
-    
+
     .PARAMETER Credential
     Credential to authenticate with at the Tower API.
 
@@ -250,7 +250,7 @@ function Connect-AnsibleTower
     }
 
     if ($TowerUrl -match "/api") {
-        throw "Specify the URL without the /api part"    
+        throw "Specify the URL without the /api part"
     }
 
     $ModuleConfig = Get-ModuleConfig
@@ -274,7 +274,7 @@ function Connect-AnsibleTower
     {
        throw ("Could not connect to Tower api url: " + $_.Exception.Message);
     }
-    
+
 
     $TokenUri = Join-AnsibleUrl $TowerUrl,'api','o','token'
     $QueryParams = [System.Web.HttpUtility]::ParseQueryString("")

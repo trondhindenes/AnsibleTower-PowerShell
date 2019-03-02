@@ -9,10 +9,10 @@ Function New-AnsibleHost
         [string]$Description,
 
         [Parameter(Mandatory=$true)]
-        $Inventory, 
+        $Inventory,
 
         [Parameter(Mandatory=$true)]
-        $group, 
+        $group,
 
         [String]$Variables = "---",
 
@@ -20,7 +20,7 @@ Function New-AnsibleHost
 
         $AnsibleTower = $Global:DefaultAnsibleTower
     )
-    
+
     $InventoryId = $null
     switch($Inventory.GetType().Fullname) {
         "AnsibleTower.Inventory" {
@@ -63,5 +63,5 @@ Function New-AnsibleHost
     $myobj.enabled = $Enabled
 
     $result = Invoke-PostAnsibleInternalJsonResult -ItemType "groups" -InputObject $myobj -itemId $GroupId -ItemSubItem "hosts"
-    
+
 }

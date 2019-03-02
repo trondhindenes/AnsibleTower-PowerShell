@@ -27,7 +27,6 @@ function Get-AnsibleOrganization
         {
             $Return = Invoke-GetAnsibleInternalJsonResult -ItemType "organizations" -AnsibleTower $AnsibleTower -Filter $Filter
         }
-        
 
         if (!($Return))
         {

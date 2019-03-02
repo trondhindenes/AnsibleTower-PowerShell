@@ -2,7 +2,7 @@ function Register-AnsibleTower {
     <#
     .SYNOPSIS
     Saves the module application's client ID from an Ansible Tower instance to allow the module to authenticate against the instance.
-    
+
     .PARAMETER ClientId
     The client ID created when the application was created in Ansible Tower.
 

@@ -3,7 +3,7 @@ function Get-AnsibleHost
     <#
     .PARAMETER Inventory
         The inventory to filter hosts by.  This can be the id (int), name (string), or an object returned from Get-AnsibleInventory.
-    
+
     .PARAMETER Name
         The name to filter hosts by.  If not specified all hosts are returned.  If the name contains * it is interpreted as a regex with '*' replaced with '.*'.  If specified without * only hosts with an exact matching name will be returned.
     #>
@@ -77,7 +77,7 @@ function Get-AnsibleHost
         {
             $Return = Invoke-GetAnsibleInternalJsonResult -ItemType "hosts" -AnsibleTower $AnsibleTower -Filter $Filter
         }
-        
+
 
         if (!($Return))
         {
@@ -95,14 +95,14 @@ function Get-AnsibleHost
 
             #Get the related groups
             $Groups = Invoke-GetAnsibleInternalJsonResult -ItemType "hosts" -Id $thishost.id -ItemSubItem "groups" -AnsibleTower $AnsibleTower
-            
+
             foreach ($group in $groups)
             {
                 if(!$GroupCache[$Group.Id]) {
                     $GroupCache[$Group.Id] = Get-AnsibleGroup -id $group.id -AnsibleTower $AnsibleTower
                 }
                 $GroupObj = $GroupCache[$Group.Id]
-                if (!($thishost.groups)) 
+                if (!($thishost.groups))
                 {
                     $thishost.groups = $GroupObj
                 }
