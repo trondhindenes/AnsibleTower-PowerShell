@@ -119,7 +119,7 @@ $CodeCoverageFiles = "$SrcRootDir\*.ps1", "$SrcRootDir\*.psm1"
 # you will be prompted to enter your API key.  The build will store the key encrypted in the
 # settings file, so that on subsequent publishes you will no longer be prompted for the API key.
 [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-$NuGetApiKey = $env:PowerShellGalleryKey
+$NuGetApiKey = $env:PowershellGalleryKey
 
 # Name of the repository you wish to publish to. If $null is specified the default repo (PowerShellGallery) is used.
 [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
@@ -171,11 +171,15 @@ Task AfterStageFiles -After StageFiles {
     # Update prerelase string
     if($env:APPVEYOR_REPO_COMMIT_MESSAGE -like "pre: *") {
         $Manifest = $Manifest -Replace 'Prerelease = \$null', 'Prerelease = "pre"'
+    } else {
+        "AppVeyor pre-release not detected"
     }
 
     # Update module version
     if($env:APPVEYOR_BUILD_VERSION) {
         $Manifest = $Manifest -Replace "ModuleVersion ?= ?['`"](\d+\.?){2,4}['`"]", "ModuleVersion = '$env:APPVEYOR_BUILD_VERSION'"
+    } else {
+        "AppVeyor build version not detected"
     }
 
     # Write updated manifest
@@ -275,5 +279,7 @@ Task AfterTest -After Test {
     if($env:APPVEYOR_JOB_ID -and (Test-Path $TestOutputFile)) {
         $wc = New-Object System.Net.WebClient
         $wc.UploadFile("https://ci.appveyor.com/api/testresults/xunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $TestOutputFile))
+    } else {
+        "Skipping upload test results"
     }
 }
