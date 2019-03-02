@@ -156,7 +156,11 @@ $TestOutputFormat = "NUnitXml"
 # Executes before the StageFiles task.
 Task BeforeStageFiles -Before StageFiles {
     $BinPath = Join-Path $SrcRootDir "bin"
-    exec { dotnet build --configuration="Release" .\AnsibleTowerClasses\ }
+    if($env:OS -eq "Windows_NT") {
+        exec { dotnet build --configuration="Release" .\AnsibleTowerClasses }
+    } else {
+        exec { dotnet build --configuration="Release" --framework=netstandard2.0 ./AnsibleTowerClasses }
+    }
     if(!(Test-Path $BinPath)) {
         New-Item $BinPath -ItemType Directory -Force
     }
