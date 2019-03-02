@@ -14,7 +14,7 @@ function Get-AnsibleUser
     {
         $Return = Invoke-GetAnsibleInternalJsonResult -ItemType "users"
     }
-    
+
 
     if (!($Return))
     {
@@ -36,18 +36,19 @@ function Get-AnsibleUser
 
 Function New-AnsibleUser
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingUserNameAndPassWordParams', '')]
     [CmdletBinding()]
     Param (
         [Parameter(Mandatory=$true)]
         $UserName,
-        [Parameter(Mandatory=$true)] 
-        $FirstName, 
         [Parameter(Mandatory=$true)]
-        $LastName, 
+        $FirstName,
         [Parameter(Mandatory=$true)]
-        $Email, 
+        $LastName,
         [Parameter(Mandatory=$true)]
-        [bool]$SuperUser, 
+        $Email,
+        [Parameter(Mandatory=$true)]
+        [bool]$SuperUser,
         [Parameter(Mandatory=$true)]
         $Password
     )
@@ -58,7 +59,7 @@ Function New-AnsibleUser
     if ($Email){$myobj.email = $Email}
     if ($SuperUser) {$myobj.is_superuser = $SuperUser}
     if ($Password) {$myobj.password = $Password}
-    
+
     $result = Invoke-PostAnsibleInternalJsonResult -ItemType "users" -InputObject $myobj
     if ($result)
     {
@@ -66,25 +67,26 @@ Function New-AnsibleUser
         $resultobj = $JsonParsers.ParseToUser($resultString)
         $resultobj
     }
-    
+
 }
 
 Function Set-AnsibleUser
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingUserNameAndPassWordParams', '')]
     [CmdletBinding()]
     Param (
         [Parameter(ValueFromPipelineByPropertyName=$true,Mandatory=$true)]
         $id,
         #[Parameter(Mandatory=$true)]
         $UserName,
-        #[Parameter(Mandatory=$true)] 
-        $FirstName, 
         #[Parameter(Mandatory=$true)]
-        $LastName, 
+        $FirstName,
         #[Parameter(Mandatory=$true)]
-        $Email, 
+        $LastName,
         #[Parameter(Mandatory=$true)]
-        [bool]$SuperUser, 
+        $Email,
+        #[Parameter(Mandatory=$true)]
+        [bool]$SuperUser,
         #[Parameter(Mandatory=$true)]
         $Password
     )
@@ -97,7 +99,7 @@ Function Set-AnsibleUser
     if ($Email){$thisuser.email = $Email}
     if ($SuperUser) {$thisuser.is_superuser = $SuperUser}
     if ($Password) {$thisuser.password = $Password}
-    
+
     $result = Invoke-PutAnsibleInternalJsonResult -ItemType "users" -InputObject $thisuser
     if ($result)
     {
@@ -105,5 +107,5 @@ Function Set-AnsibleUser
         $resultobj = $JsonParsers.ParseToUser($resultString)
         $resultobj
     }
-    
+
 }
