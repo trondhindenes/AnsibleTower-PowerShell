@@ -2,6 +2,7 @@ version: 0.3.{build}
 skip_tags: true
 image:
   - Visual Studio 2017
+  - ubuntu1804
 init:
 - ps:
 environment:
