@@ -22,7 +22,7 @@ install:
     install-module PSScriptAnalyzer -force -AllowClobber -SkipPublisherCheck
 build_script:
 - ps: |
-        if($env:APPVEYOR_REPO_BRANCH -ne "master" -or $env:APPVEYOR_PULL_REQUEST_NUMBER -or $env:APPVEYOR_REPO_COMMIT_MESSAGE -like "skip: *" -or $env:OS -ne "Windows_NT") {
+      if($env:APPVEYOR_REPO_BRANCH -ne "master" -or $env:APPVEYOR_PULL_REQUEST_NUMBER -or $env:APPVEYOR_REPO_COMMIT_MESSAGE -like "skip: *" -or $env:OS -ne "Windows_NT") {
         .\Invoke-Build.ps1 build,test
       } else {
         .\Invoke-Build.ps1 publish
