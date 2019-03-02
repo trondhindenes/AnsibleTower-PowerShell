@@ -1,6 +1,7 @@
 function Get-AnsibleInventory
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
     Param (
         $Name,
 
@@ -33,7 +34,7 @@ function Get-AnsibleInventory
         #Nothing returned from the call
         Return
     }
-    $returnobj = @()
+
     foreach ($jsonorg in $return)
     {
         #Shift back to json and let newtonsoft parse it to a strongly named object instead

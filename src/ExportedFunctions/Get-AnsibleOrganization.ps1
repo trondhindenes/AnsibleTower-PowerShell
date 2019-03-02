@@ -1,6 +1,7 @@
 function Get-AnsibleOrganization
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
     Param (
         [String]$Name,
 

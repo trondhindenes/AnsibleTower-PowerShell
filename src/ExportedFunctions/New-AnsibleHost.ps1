@@ -1,6 +1,7 @@
 Function New-AnsibleHost
 {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess=$true)]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
     Param (
         [Parameter(Mandatory=$true)]
         [string]$Name,
@@ -62,6 +63,7 @@ Function New-AnsibleHost
     $myobj.variables = $Variables
     $myobj.enabled = $Enabled
 
-    $result = Invoke-PostAnsibleInternalJsonResult -ItemType "groups" -InputObject $myobj -itemId $GroupId -ItemSubItem "hosts"
-
+    if($PSCmdlet.ShouldProcess($AnsibleTower.ToString(), "Create host $($MyObj.Name)")) {
+        Invoke-PostAnsibleInternalJsonResult -ItemType "groups" -InputObject $myobj -itemId $GroupId -ItemSubItem "hosts" > $null
+    }
 }

@@ -1,4 +1,6 @@
 function Test-AnsibleTower {
+    [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
     param(
         $AnsibleTower = $Global:DefaultAnsibleTower
     )

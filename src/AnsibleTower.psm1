@@ -12,6 +12,7 @@ if($PSVersionTable["PSEdition"] -eq "Core") {
 Add-Type -Path $DllPath
 
 # Load the json parsers to have it handy whenever.
+[System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
 $JsonParsers = New-Object AnsibleTower.JsonFunctions
 
 #D ot-source/Load the other powershell scripts
@@ -87,9 +88,11 @@ function Get-AnsibleResourceUrl
     .OUTPUTS
     API url part for the specified resource, e.g. "/api/v1/job_templates/"
     #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
     param(
         [Parameter(Mandatory=$true)]
         [string]$Resource,
+
         $AnsibleTower = $Global:DefaultAnsibleTower
     )
 
@@ -107,6 +110,7 @@ function Get-AnsibleResourceUrl
 
 function Invoke-GetAnsibleInternalJsonResult
 {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
     param(
         [Parameter(Mandatory=$true)]
         $ItemType,
@@ -144,12 +148,12 @@ function Invoke-GetAnsibleInternalJsonResult
             Write-Output $invokeResult.results
         }
         $ItemApiUrl = $InvokeResult.Next
-        $QS = $null
     } while($ItemApiUrl)
 }
 
 Function Invoke-PostAnsibleInternalJsonResult
 {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
     param(
         [Parameter(Mandatory=$true)]
         $ItemType,
@@ -239,6 +243,7 @@ function Connect-AnsibleTower
     Connects to the Tower host at 'https://ansible.domain.local' using the credential supplied in $myCredential. Any certificate errors are ignored.
     User details beloning to the specified credential are in the $me variable.
     #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
     param (
         [Parameter(Mandatory=$true)]
         [System.Management.Automation.PSCredential]$Credential,
@@ -307,6 +312,7 @@ function Connect-AnsibleTower
             $Tower.Endpoints.Add($_.Name, $Endpoints."$($_.Name)")
         }
         #TODO: if ! -notdefault
+        [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
         $Global:DefaultAnsibleTower = $Tower
     } catch {
         Write-Error -Message ("Could not authenticate: " + $_.Exception.Message) -Exception $_.Exception

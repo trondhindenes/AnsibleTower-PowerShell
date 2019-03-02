@@ -1,4 +1,5 @@
 function Set-ObjectVariableData {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseShouldProcessForStateChangingFunctions', '')]
     param(
         [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
         $Object,

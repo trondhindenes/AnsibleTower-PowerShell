@@ -1,6 +1,7 @@
 function Get-AnsibleGroup
 {
     [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
     Param (
         [String]$Name,
 
@@ -51,7 +52,7 @@ function Get-AnsibleGroup
         #Nothing returned from the call
         Return
     }
-    $returnobj = @()
+
     foreach ($jsongroup in $return)
     {
         #Shift back to json and let newtonsoft parse it to a strongly named object instead

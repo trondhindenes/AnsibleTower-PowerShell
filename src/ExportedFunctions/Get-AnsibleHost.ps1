@@ -9,6 +9,7 @@ function Get-AnsibleHost
     #>
     [CmdletBinding()]
     [OutputType([AnsibleTower.Host])]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
     Param (
         [string]$Name,
 

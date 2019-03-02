@@ -1,5 +1,6 @@
 function Add-AnsibleGroupmember {
     [CmdletBinding(SupportsShouldProcess=$true)]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
     param(
         [Parameter(Mandatory=$true)]
         $Group,

@@ -1,4 +1,6 @@
 function Invoke-AnsibleRequest {
+    [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
     param(
         $AnsibleTower = $Global:DefaultAnsibleTower,
         [Parameter(ParameterSetName="relpath")]

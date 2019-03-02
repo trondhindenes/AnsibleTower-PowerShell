@@ -1,5 +1,6 @@
 function Remove-AnsibleHost {
     [CmdletBinding(SupportsShouldProcess=$true,ConfirmImpact="High")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
     param(
         [Parameter(Mandatory=$true,ParameterSetName="ByUrl")]
         $Url,

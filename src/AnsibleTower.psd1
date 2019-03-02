@@ -67,16 +67,41 @@ PowerShellVersion = '3.0'
 
 # Functions to export from this module
 # Export all the "regular ones (*-Ansible*, such as Get-AnsibleOrganization. Do not export the internal ones such as Invoke-GetAnsibleInternalJsonResult
-FunctionsToExport = '*-Ansible*'
+FunctionsToExport = @(
+    'Add-AnsibleGroupmember',
+    'Connect-AnsibleTower',
+    'Get-AnsibleGroup',
+    'Get-AnsibleHost',
+    'Get-AnsibleInventory',
+    'Get-AnsibleJob',
+    'Get-AnsibleJobTemplate',
+    'Get-AnsibleJobTemplateID',
+    'Get-AnsibleOrganization',
+    'Get-AnsibleResourceUrl',
+    'Get-AnsibleUser',
+    'Invoke-AnsibleJob',
+    'Invoke-AnsibleJobTemplate',
+    'Invoke-AnsibleRequest',
+    'Join-AnsibleUrl',
+    'New-AnsibleHost',
+    'New-AnsibleOrganization',
+    'New-AnsibleUser',
+    'Register-AnsibleTower',
+    'Remove-AnsibleHost',
+    'Set-AnsibleGroup',
+    'Set-AnsibleUser',
+    'Test-AnsibleTower',
+    'Wait-AnsibleJob'
+)
 
 # Cmdlets to export from this module
-CmdletsToExport = '*'
+CmdletsToExport = @()
 
 # Variables to export from this module
-VariablesToExport = ''
+VariablesToExport = @()
 
 # Aliases to export from this module
-AliasesToExport = '*'
+AliasesToExport = @()
 
 # List of all modules packaged with this module
 # ModuleList = @()
