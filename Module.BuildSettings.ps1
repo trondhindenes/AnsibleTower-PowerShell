@@ -49,7 +49,7 @@ $PackageRestoreEnabled = $False
 
 # Enable/disable use of PSScriptAnalyzer to perform script analysis.
 [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-$ScriptAnalysisEnabled = $true
+$ScriptAnalysisEnabled = $false
 
 # When PSScriptAnalyzer is enabled, control which severity level will generate a build failure.
 # Valid values are Error, Warning, Information and None.  "None" will report errors but will not
@@ -142,7 +142,7 @@ $SettingsPath = "$env:LOCALAPPDATA\Plaster\NewModuleTemplate\SecuredBuildSetting
 # This is typically used to write out test results so that they can be sent to a CI
 # system like AppVeyor.
 [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-$TestOutputFile = "PesterResults.xml"
+$TestOutputFile = "..\PesterResults.xml"
 
 # Specifies the test output format to use when the TestOutputFile property is given
 # a path.  This parameter is passed through to Invoke-Pester's -OutputFormat parameter.

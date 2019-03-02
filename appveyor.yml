@@ -19,8 +19,9 @@ install:
     Get-PackageProvider -Name NuGet -ForceBootstrap
 
     install-module pester -force -AllowClobber -SkipPublisherCheck
+    install-module PSScriptAnalyzer -force -AllowClobber -SkipPublisherCheck
 build_script:
-- ps: .\Invoke-Build.ps1 build
+- ps: .\Invoke-Build.ps1 build,test
 
 before_deploy:
 - ps: |
