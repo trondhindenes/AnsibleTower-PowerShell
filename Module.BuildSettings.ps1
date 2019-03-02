@@ -165,6 +165,21 @@ Task BeforeStageFiles -Before StageFiles {
 
 # Executes after the StageFiles task.
 Task AfterStageFiles -After StageFiles {
+    $ManifestPath = Join-Path $OutDir "AnsibleTower\AnsibleTower.psd1"
+    $Manifest = Get-Content $ManifestPath -Raw
+
+    # Update prerelase string
+    if($env:APPVEYOR_REPO_COMMIT_MESSAGE -like "pre: *") {
+        $Manifest = $Manifest -Replace 'Prerelease = \$null', 'Prerelease = "pre"'
+    }
+
+    # Update module version
+    if($env:APPVEYOR_BUILD_VERSION) {
+        $Manifest = $Manifest -Replace "ModuleVersion ?= ?['`"](\d+\.?){2,4}['`"]", "ModuleVersion = '$env:APPVEYOR_BUILD_VERSION'"
+    }
+
+    # Write updated manifest
+    Set-Content -Path $ManifestPath -Value $Manifest
 }
 
 ###############################################################################

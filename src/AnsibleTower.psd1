@@ -88,6 +88,7 @@ AliasesToExport = '*'
 PrivateData = @{
 
     PSData = @{
+        Prerelease = $null
 
         # Tags applied to this module. These help with module discovery in online galleries.
         Tags = @("Ansible","Configuration","Management")
