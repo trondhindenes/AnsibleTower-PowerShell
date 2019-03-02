@@ -22,10 +22,10 @@ install:
     install-module PSScriptAnalyzer -force -AllowClobber -SkipPublisherCheck
 build_script:
 - ps: |
-      if($env:APPVEYOR_REPO_BRANCH -eq "master") {
-        .\Invoke-Build.ps1 publish
-      } else {
+      if($env:APPVEYOR_REPO_BRANCH -ne "master" -or $env:APPVEYOR_PULL_REQUEST_NUMBER) {
         .\Invoke-Build.ps1 build,test
+      } else {
+        .\Invoke-Build.ps1 publish
       }
 
 artifacts:
