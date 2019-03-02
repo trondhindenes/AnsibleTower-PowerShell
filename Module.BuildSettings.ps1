@@ -174,7 +174,8 @@ Task AfterStageFiles -After StageFiles {
 
     # Update module version
     if($env:APPVEYOR_BUILD_VERSION) {
-        $Manifest = $Manifest -Replace "ModuleVersion ?= ?['`"](\d+\.?){2,4}['`"]", "ModuleVersion = '$env:APPVEYOR_BUILD_VERSION'"
+        $VersionPart = $env:APPVEYOR_BUILD_VERSION.Split("-")[0]
+        $Manifest = $Manifest -Replace "ModuleVersion ?= ?['`"](\d+\.?){2,4}['`"]", "ModuleVersion = '$VersionPart'"
     } else {
         "AppVeyor build version not detected"
     }
@@ -182,7 +183,9 @@ Task AfterStageFiles -After StageFiles {
     # Update prerelase string
     if($env:APPVEYOR_REPO_COMMIT_MESSAGE -like "pre: *" -and $env:OS -eq "Windows_NT") {
         $Manifest = $Manifest -Replace 'Prerelease = \$null', 'Prerelease = "pre"'
-        Update-AppveyorBuild -Version "${env:APPVEYOR_BUILD_VERSION}-pre"
+        if($env:APPVEYOR_BUILD_VERSION -notlike "*-pre") {
+            Update-AppveyorBuild -Version "${env:APPVEYOR_BUILD_VERSION}-pre"
+        }
     } else {
         "AppVeyor pre-release not detected"
     }
