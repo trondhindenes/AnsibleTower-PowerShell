@@ -21,13 +21,13 @@ install:
     install-module pester -force -AllowClobber -SkipPublisherCheck
     install-module PSScriptAnalyzer -force -AllowClobber -SkipPublisherCheck
 build_script:
-- ps: .\Invoke-Build.ps1 build,test
-
-before_deploy:
 - ps: |
       if($env:APPVEYOR_REPO_BRANCH -eq "master") {
         .\Invoke-Build.ps1 publish
+      } else {
+        .\Invoke-Build.ps1 build,test
       }
+
 artifacts:
   - path: AnsibleTower.zip
 
