@@ -168,18 +168,19 @@ Task AfterStageFiles -After StageFiles {
     $ManifestPath = Join-Path $OutDir "AnsibleTower\AnsibleTower.psd1"
     $Manifest = Get-Content $ManifestPath -Raw
 
-    # Update prerelase string
-    if($env:APPVEYOR_REPO_COMMIT_MESSAGE -like "pre: *") {
-        $Manifest = $Manifest -Replace 'Prerelease = \$null', 'Prerelease = "pre"'
-    } else {
-        "AppVeyor pre-release not detected"
-    }
-
     # Update module version
     if($env:APPVEYOR_BUILD_VERSION) {
         $Manifest = $Manifest -Replace "ModuleVersion ?= ?['`"](\d+\.?){2,4}['`"]", "ModuleVersion = '$env:APPVEYOR_BUILD_VERSION'"
     } else {
         "AppVeyor build version not detected"
+    }
+
+    # Update prerelase string
+    if($env:APPVEYOR_REPO_COMMIT_MESSAGE -like "pre: *") {
+        $Manifest = $Manifest -Replace 'Prerelease = \$null', 'Prerelease = "pre"'
+        Update-AppveyorBuild -Version "${env:APPVEYOR_BUILD_VERSION}-pre"
+    } else {
+        "AppVeyor pre-release not detected"
     }
 
     # Write updated manifest
