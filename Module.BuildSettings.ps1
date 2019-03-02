@@ -22,9 +22,15 @@ $ModuleName = Get-Item $SrcRootDir/*.psd1 |
 $OutDir = "$PSScriptRoot\Release"
 
 # The local installation directory for the install task. Defaults to your home Modules location.
-[System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-$InstallPath = Join-Path (Split-Path $profile.CurrentUserAllHosts -Parent) `
-                          "Modules\$ModuleName\$((Test-ModuleManifest -Path $SrcRootDir\$ModuleName.psd1).Version.ToString())"
+
+try {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
+    $InstallPath = Join-Path (Split-Path $profile.CurrentUserAllHosts -Parent) `
+                            "Modules\$ModuleName\$((Test-ModuleManifest -Path $SrcRootDir\$ModuleName.psd1).Version.ToString())"
+} catch {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
+    $InstallPath = $null
+}
 
 # Default Locale used for help generation, defaults to en-US.
 [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
