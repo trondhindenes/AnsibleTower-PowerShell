@@ -99,7 +99,7 @@ $CatalogVersion = 2
 
 # Enable/disable Pester code coverage reporting.
 [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-$CodeCoverageEnabled = $true
+$CodeCoverageEnabled = $false
 
 # CodeCoverageFiles specifies the files to perform code coverage analysis on. This property
 # acts as a direct input to the Pester -CodeCoverage parameter, so will support constructions
@@ -113,11 +113,11 @@ $CodeCoverageFiles = "$SrcRootDir\*.ps1", "$SrcRootDir\*.psm1"
 # you will be prompted to enter your API key.  The build will store the key encrypted in the
 # settings file, so that on subsequent publishes you will no longer be prompted for the API key.
 [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-$NuGetApiKey = $null
+$NuGetApiKey = $env:PowerShellGalleryKey
 
 # Name of the repository you wish to publish to. If $null is specified the default repo (PowerShellGallery) is used.
 [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-$PublishRepository = $null
+$PublishRepository = "PSGallery"
 
 # Path to the release notes file.  Set to $null if the release notes reside in the manifest file.
 # The contents of this file are used during publishing for the ReleaseNotes parameter.
@@ -136,7 +136,7 @@ $SettingsPath = "$env:LOCALAPPDATA\Plaster\NewModuleTemplate\SecuredBuildSetting
 # This is typically used to write out test results so that they can be sent to a CI
 # system like AppVeyor.
 [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-$TestOutputFile = $null
+$TestOutputFile = "PesterResults.xml"
 
 # Specifies the test output format to use when the TestOutputFile property is given
 # a path.  This parameter is passed through to Invoke-Pester's -OutputFormat parameter.
@@ -171,6 +171,14 @@ Task BeforeBuild -Before Build {
 
 # Executes after the Build task.
 Task AfterBuild -After Build {
+    try {
+        Microsoft.PowerShell.Management\Push-Location -LiteralPath $OutDir
+        Import-Module microsoft.powershell.archive
+        Compress-Archive -path .\AnsibleTower -DestinationPath ..\AnsibleTower.zip -Force
+
+    } finally {
+        Microsoft.PowerShell.Management\Pop-Location
+    }
 }
 
 ###############################################################################
@@ -231,4 +239,20 @@ Task BeforePublish -Before Publish {
 
 # Executes after the Publish task.
 Task AfterPublish -After Publish {
+}
+
+###############################################################################
+# Customize these tasks for performing operations before and/or after Test.
+###############################################################################
+
+# Executes before the Test task.
+Task BeforeTest -Before Test {
+}
+
+# Executes after the Test task.
+Task AfterTest -After Test {
+    if($env:APPVEYOR_JOB_ID -and (Test-Path $TestOutputFile)) {
+        $wc = New-Object System.Net.WebClient
+        $wc.UploadFile("https://ci.appveyor.com/api/testresults/xunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $TestOutputFile))
+    }
 }

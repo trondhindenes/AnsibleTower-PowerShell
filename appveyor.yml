@@ -1,0 +1,40 @@
+version: 0.3.0.{build}
+skip_tags: true
+image:
+  - Visual Studio 2017
+init:
+- ps:
+environment:
+  PowershellGalleryKey:
+    secure: pRPJORXDzl7G6sU5Qz+K+tvDpzwYY+KgXDzAkY31Zb6cxKUJFFzYvzci7+Xgt0xN
+  GitHubKey:
+    secure: 64LLgggYJc3bb1D7G22KGYQFHknuWvoFZAUewRfX0QXV8gBjG97WwwU9lC2HNQ99
+install:
+- ps: |
+    import-module powershellget
+    Install-module PowerShellGet -force -AllowClobber -SkipPublisherCheck
+    Remove-Module PowerShellGet -Force
+    Import-Module PowerShellGet -Force
+
+    Get-PackageProvider -Name NuGet -ForceBootstrap
+
+    install-module pester -force -AllowClobber -SkipPublisherCheck
+build_script:
+- ps: .\Invoke-Build.ps1 build
+
+before_deploy:
+- ps: |
+      if($env:APPVEYOR_REPO_BRANCH -eq "master") {
+        .\Invoke-Build.ps1 publish
+      }
+artifacts:
+  -path: AnsibleTower.zip
+
+deploy:
+- provider: GitHub
+  tag: $(APPVEYOR_BUILD_VERSION)
+  auth_token:
+    secure: 64LLgggYJc3bb1D7G22KGYQFHknuWvoFZAUewRfX0QXV8gBjG97WwwU9lC2HNQ99
+  draft: true
+  on:
+    APPVEYOR_REPO_BRANCH: master

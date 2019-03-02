@@ -6,6 +6,8 @@
 
 bin
 Release/
+AnsibleTower.zip
+PesterResults.xml
 
 # Module binary files
 src/bin/
