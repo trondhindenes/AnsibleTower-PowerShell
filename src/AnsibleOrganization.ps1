@@ -2,7 +2,7 @@ Function New-AnsibleOrganization
 {
     [CmdletBinding()]
     Param ($Name, $Description)
-    $myobj = "" | Select name, description
+    $myobj = "" | Select-Object name, description
     $myobj.name = $Name
     if ($Description)
     {

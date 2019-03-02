@@ -37,6 +37,7 @@ function Get-AnsibleUser
 Function New-AnsibleUser
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingUserNameAndPassWordParams', '')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingPlainTextForPassword', '')]
     [CmdletBinding()]
     Param (
         [Parameter(Mandatory=$true)]
@@ -52,7 +53,7 @@ Function New-AnsibleUser
         [Parameter(Mandatory=$true)]
         $Password
     )
-    $myobj = "" | Select username, first_name, last_name, email, is_superuser, password
+    $myobj = "" | Select-Object username, first_name, last_name, email, is_superuser, password
     $myobj.username = $UserName
     if ($FirstName){$myobj.first_name = $FirstName}
     if ($LastName){$myobj.last_name = $LastName}
@@ -73,6 +74,7 @@ Function New-AnsibleUser
 Function Set-AnsibleUser
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingUserNameAndPassWordParams', '')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingPlainTextForPassword', '')]
     [CmdletBinding()]
     Param (
         [Parameter(ValueFromPipelineByPropertyName=$true,Mandatory=$true)]

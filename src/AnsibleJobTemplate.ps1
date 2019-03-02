@@ -21,7 +21,7 @@ function Get-AnsibleJobTemplateID
     )
 
 	# We should be passing a search term here, prevents from passing all jobs via the REST call.
-    (Get-AnsibleJobTemplate | ? { $_.name -eq $Name }).id
+    (Get-AnsibleJobTemplate | Where-Object { $_.name -eq $Name }).id
 }
 
 function Get-AnsibleJobTemplate

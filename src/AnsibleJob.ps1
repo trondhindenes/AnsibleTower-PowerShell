@@ -145,7 +145,7 @@ function Wait-AnsibleJob
             }
 
             Write-Verbose ("Sleeping [{0}] seconds..." -f $Interval);
-            sleep -Seconds $Interval
+            Start-Sleep -Seconds $Interval
         }
         $Job = Get-AnsibleJob -id $Job.id;
     }

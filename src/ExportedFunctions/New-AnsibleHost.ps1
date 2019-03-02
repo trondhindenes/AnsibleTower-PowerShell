@@ -55,7 +55,7 @@ Function New-AnsibleHost
         }
     }
 
-    $myobj = "" | Select name, description, inventory, variables, enabled
+    $myobj = "" | Select-Object name, description, inventory, variables, enabled
     $myobj.Name = $Name
     $myobj.Description = $Description
     $myobj.Inventory = $InventoryId

@@ -15,9 +15,9 @@ Add-Type -Path $DllPath
 $JsonParsers = New-Object AnsibleTower.JsonFunctions
 
 #D ot-source/Load the other powershell scripts
-Get-ChildItem "*.ps1" -path $PSScriptRoot | where {$_.Name -notmatch "tests|Build|Default"} |  ForEach-Object { . $_.FullName }
-Get-ChildItem "*.ps1" -Path $PSScriptRoot/InternalFunctions | where {$_.Name -notmatch "tests"} |  ForEach-Object { . $_.FullName }
-Get-ChildItem "*.ps1" -Path $PSScriptRoot/ExportedFunctions | where {$_.Name -notmatch "tests"} |  ForEach-Object { . $_.FullName }
+Get-ChildItem "*.ps1" -path $PSScriptRoot | Where-Object {$_.Name -notmatch "tests|Build|Default"} |  ForEach-Object { . $_.FullName }
+Get-ChildItem "*.ps1" -Path $PSScriptRoot/InternalFunctions | Where-Object {$_.Name -notmatch "tests"} |  ForEach-Object { . $_.FullName }
+Get-ChildItem "*.ps1" -Path $PSScriptRoot/ExportedFunctions | Where-Object {$_.Name -notmatch "tests"} |  ForEach-Object { . $_.FullName }
 
 
 function Disable-CertificateVerification
@@ -63,7 +63,12 @@ function Join-AnsibleUrl
         [string[]]$Parts
     )
 
-    return (($Parts | ? { $_ } | % { $_.trim('/').trim() } | ? { $_ } ) -join '/') + '/';
+    return (
+        ($Parts | Where-Object { $_ } | ForEach-Object {
+            $_.trim('/').trim()
+        } | Where-Object { $_ }
+        ) -join '/'
+    ) + '/';
 }
 
 function Get-AnsibleResourceUrl
