@@ -284,3 +284,15 @@ Task AfterTest -After Test {
         "Skipping upload test results"
     }
 }
+
+Task AfterClean -After Clean {
+    exec { dotnet clean --configuration="Release" .\AnsibleTowerClasses\ }
+    $BinPath = Join-Path $SrcRootDir "bin"
+
+    # Maybe a bit paranoid but this task nuked \ on my laptop. Good thing I was not running as admin.
+    if ($BinPath.Length -gt 3) {
+        Get-ChildItem $Binpath | Remove-Item -Recurse -Force -Verbose:$VerbosePreference
+    } else {
+        Write-Verbose "$($Task.Name) - `$BinPath '$BinPath' must be longer than 3 characters."
+    }
+}
