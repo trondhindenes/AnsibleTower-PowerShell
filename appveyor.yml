@@ -28,7 +28,7 @@ before_deploy:
         .\Invoke-Build.ps1 publish
       }
 artifacts:
-  -path: AnsibleTower.zip
+  - path: AnsibleTower.zip
 
 deploy:
 - provider: GitHub
