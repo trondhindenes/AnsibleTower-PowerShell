@@ -6,6 +6,9 @@ image:
 init:
 - ps:
 environment:
+  POWERSHELL_TELEMETRY_OPTOUT: 1
+  # Avoid expensive initialization of dotnet cli, see: http://donovanbrown.com/post/Stop-wasting-time-during-NET-Core-builds
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
   PowershellGalleryKey:
     secure: pRPJORXDzl7G6sU5Qz+K+tvDpzwYY+KgXDzAkY31Zb6cxKUJFFzYvzci7+Xgt0xN
   GitHubKey:
