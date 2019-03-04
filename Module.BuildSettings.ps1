@@ -290,13 +290,16 @@ Task AfterTest -After Test {
 }
 
 Task AfterClean -After Clean {
-    exec { dotnet clean --configuration="Release" .\AnsibleTowerClasses\ }
-    $BinPath = Join-Path $SrcRootDir "bin"
+    $ObjPath = Join-Path $PSScriptRoot "AnsibleTowerClasses\AnsibleTower\obj"
+    $ProjBinPath = Join-Path $PSScriptRoot "AnsibleTowerClasses\AnsibleTower\bin"
+    $SrcBinPath = Join-Path $SrcRootDir "bin"
 
-    # Maybe a bit paranoid but this task nuked \ on my laptop. Good thing I was not running as admin.
-    if ($BinPath.Length -gt 3 -and (Test-path $BinPath)) {
-        Get-ChildItem $Binpath | Remove-Item -Recurse -Force -Verbose:$VerbosePreference
-    } else {
-        Write-Verbose "$($Task.Name) - `$BinPath '$BinPath' must be longer than 3 characters."
+    $ObjPath, $ProjBinPath, $SrcBinPath | ForEach-Object {
+        if($_.Length -gt 3 -and (Test-Path $_)) {
+            Get-ChildItem $_ | Remove-Item -Recurse -Force -Verbose:$VerbosePreference
+        } else {
+            Write-Verbose "$($Task.Name) - Path '$_' must be longer than 3 characters."
+        }
     }
+    exec { dotnet clean --configuration="Release" .\AnsibleTowerClasses\ }
 }
