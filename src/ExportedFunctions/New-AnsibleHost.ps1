@@ -64,6 +64,6 @@ Function New-AnsibleHost
     $myobj.enabled = $Enabled
 
     if($PSCmdlet.ShouldProcess($AnsibleTower.ToString(), "Create host $($MyObj.Name)")) {
-        Invoke-PostAnsibleInternalJsonResult -ItemType "groups" -InputObject $myobj -itemId $GroupId -ItemSubItem "hosts" > $null
+        Invoke-PostAnsibleInternalJsonResult -ItemType "groups" -InputObject $myobj -itemId $GroupId -ItemSubItem "hosts" -AnsibleTower $AnsibleTower > $null
     }
 }
