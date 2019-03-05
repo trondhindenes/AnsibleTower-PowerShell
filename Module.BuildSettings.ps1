@@ -322,6 +322,7 @@ Task IntegrationTests {
                 $wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", $IntegrationTestOutputFile)
                 Write-Host "Uploaded integration test results"
                 Push-AppveyorArtifact -Path $IntegrationTestOutputFile
+                cat $IntegrationTestOutputFile
             } catch {
                 $e = $_.Exception
                 do {
