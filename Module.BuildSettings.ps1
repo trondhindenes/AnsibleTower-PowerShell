@@ -284,8 +284,12 @@ Task BeforeTest -Before Test {
 # Executes after the Test task.
 Task AfterTest -After Test {
     if($env:APPVEYOR_JOB_ID -and (Test-Path $TestOutputFile)) {
-        $wc = New-Object System.Net.WebClient
-        $wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $TestOutputFile))
+        try {
+            $wc = New-Object System.Net.WebClient
+            $wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $TestOutputFile))
+        } catch {
+            Write-Host "Error uploading test results: $($_.Exception.Message)"
+        }
     } else {
         "Skipping upload test results"
     }
@@ -313,8 +317,12 @@ Task IntegrationTests {
         $IntegrationTestOutputFile = "../IntegrationTests.xml"
         $TestResult = Invoke-Pester -Script @{ Path='.\integration'; Parameters=@{ }} -Tag Integration -OutputFile $IntegrationTestOutputFile -OutputFormat "NUnitXml" -PassThru
         if($env:APPVEYOR_JOB_ID -and (Test-Path $TestOutputFile)) {
-            $wc = New-Object System.Net.WebClient
-            $wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $IntegrationTestOutputFile))
+            try {
+                $wc = New-Object System.Net.WebClient
+                $wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $IntegrationTestOutputFile))
+            } catch {
+                Write-Host "Error uploading test results: $($_.Exception.Message)"
+            }
         } else {
             "Skipping upload test results"
         }
