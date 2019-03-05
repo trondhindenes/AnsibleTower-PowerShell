@@ -206,15 +206,20 @@ Function Invoke-PutAnsibleInternalJsonResult
 
     $params = @{
         'Uri' = Join-AnsibleUrl $script:AnsibleUrl, $ItemApiUrl;
-        'Credential' = $script:AnsibleCredential;
+        #'Credential' = $script:AnsibleCredential;
         'Method' = 'Put';
         'ContentType' = 'application/json';
         'Body' = ($InputObject | ConvertTo-Json -Depth 99);
         'ErrorAction' = 'Stop';
     }
 
-    Write-Verbose ("Invoke-PutAnsibleInternalJsonResult: Invoking url [{0}]" -f $params.Uri);
-    return Invoke-RestMethod @params;
+    $Request = @{
+        FullPath = $ItemApiUrl
+        Method = "PUT"
+        Body = ($InputObject | ConvertTo-Json -Depth 99)
+        AnsibleTower = $InputObject.AnsibleTower
+    }
+    return Invoke-AnsibleRequest @Request
 }
 
 function Connect-AnsibleTower
