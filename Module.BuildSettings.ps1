@@ -94,7 +94,7 @@ $CertPath = "Cert:\"
 
 # Enable/disable generation of a catalog (.cat) file for the module.
 [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-$CatalogGenerationEnabled = $true
+$CatalogGenerationEnabled = $false
 
 # Select the hash version to use for the catalog file: 1 for SHA1 (compat with Windows 7 and
 # Windows Server 2008 R2), 2 for SHA2 to support only newer Windows versions.
