@@ -263,12 +263,6 @@ function Connect-AnsibleTower
         throw "Specify the URL without the /api part"
     }
 
-    $ModuleConfig = Get-ModuleConfig
-    $Application = $ModuleConfig.Applications[$TowerUrl]
-    if(!$Application) {
-        throw "Please create an application in Ansible Tower and register it using Register-AnsibleTower"
-    }
-
     try
     {
         Write-Verbose "Determining current Tower API version url..."
@@ -286,24 +280,26 @@ function Connect-AnsibleTower
     }
 
 
-    $TokenUri = Join-AnsibleUrl $TowerUrl,'api','o','token'
-    $QueryParams = [System.Web.HttpUtility]::ParseQueryString("")
-    $QueryParams.Add("grant_type", "password")
-    $QueryParams.Add("client_id", $Application.client_id)
-    $QueryParams.Add("username", $Credential.Username)
-    $QueryParams.Add("password", $Credential.GetNetworkCredential().Password)
-    $QueryParams.Add("description", "PowerShell")
-    $QueryParams.Add("scope", "write")
-    $TokenUri = "${TokenUri}?$($QueryParams.ToString())"
-
+    $PATUri = Join-AnsibleUrl $TowerApiUrl,'users',$Credential.Username,'personal_tokens'
+    $Authorization = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("$($Credential.Username):$($Credential.GetNetworkCredential().Password)"))
+    $Body = @{
+        description="AnsibleTower-Powershell"
+        application=$null
+        scope="write"
+    }
     Write-Verbose "Logging in to Tower..."
     try {
-        $Token = Invoke-RestMethod -Uri $TokenUri -Method POST -ContentType "application/x-www-form-urlencoded"
+        $Response = Invoke-RestMethod -Uri $PATUri -Method POST -Headers @{ Authorization = "Basic $Authorization" } -ContentType "application/json" -Body (ConvertTo-Json $Body)
+        $Token = New-Object AnsibleTower.Token -Property @{
+            access_token = $Response.Token
+            token_type = $Response.Type
+            scope = $Response.Scope
+        }
         $Tower = New-Object AnsibleTower.Tower -Property @{
             AnsibleUrl = $TowerUrl
             TowerApiUrl = $TowerApiUrl
             Token = $Token
-            TokenExpiration = [DateTime]::Now.AddSeconds($Token.expires_in)
+            TokenExpiration = $Response.Expires
             Me = $null
         }
         $Tower.Me = Test-AnsibleTower -AnsibleTower $Tower
