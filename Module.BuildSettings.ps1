@@ -94,7 +94,7 @@ $CertPath = "Cert:\"
 
 # Enable/disable generation of a catalog (.cat) file for the module.
 [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-$CatalogGenerationEnabled = $true
+$CatalogGenerationEnabled = $false
 
 # Select the hash version to use for the catalog file: 1 for SHA1 (compat with Windows 7 and
 # Windows Server 2008 R2), 2 for SHA2 to support only newer Windows versions.
@@ -106,6 +106,8 @@ $CatalogVersion = 2
 # Enable/disable Pester code coverage reporting.
 [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
 $CodeCoverageEnabled = $false
+
+$ExcludeTestTags = @("Integration")
 
 # CodeCoverageFiles specifies the files to perform code coverage analysis on. This property
 # acts as a direct input to the Pester -CodeCoverage parameter, so will support constructions
@@ -142,7 +144,7 @@ $SettingsPath = "$env:LOCALAPPDATA\Plaster\NewModuleTemplate\SecuredBuildSetting
 # This is typically used to write out test results so that they can be sent to a CI
 # system like AppVeyor.
 [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-$TestOutputFile = "..\PesterResults.xml"
+$TestOutputFile = "$PSScriptRoot/PesterResults.xml"
 
 # Specifies the test output format to use when the TestOutputFile property is given
 # a path.  This parameter is passed through to Invoke-Pester's -OutputFormat parameter.
@@ -285,21 +287,60 @@ Task BeforeTest -Before Test {
 # Executes after the Test task.
 Task AfterTest -After Test {
     if($env:APPVEYOR_JOB_ID -and (Test-Path $TestOutputFile)) {
-        $wc = New-Object System.Net.WebClient
-        $wc.UploadFile("https://ci.appveyor.com/api/testresults/xunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $TestOutputFile))
+        try {
+            $wc = New-Object System.Net.WebClient
+            $wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", $TestOutputFile)
+        } catch {
+            Write-Host "Error uploading test results: $($_.Exception.Message)"
+        }
     } else {
         "Skipping upload test results"
     }
 }
 
 Task AfterClean -After Clean {
-    exec { dotnet clean --configuration="Release" .\AnsibleTowerClasses\ }
-    $BinPath = Join-Path $SrcRootDir "bin"
+    $ObjPath = Join-Path $PSScriptRoot "AnsibleTowerClasses\AnsibleTower\obj"
+    $ProjBinPath = Join-Path $PSScriptRoot "AnsibleTowerClasses\AnsibleTower\bin"
+    $SrcBinPath = Join-Path $SrcRootDir "bin"
 
-    # Maybe a bit paranoid but this task nuked \ on my laptop. Good thing I was not running as admin.
-    if ($BinPath.Length -gt 3 -and (Test-path $BinPath)) {
-        Get-ChildItem $Binpath | Remove-Item -Recurse -Force -Verbose:$VerbosePreference
-    } else {
-        Write-Verbose "$($Task.Name) - `$BinPath '$BinPath' must be longer than 3 characters."
+    $ObjPath, $ProjBinPath, $SrcBinPath | ForEach-Object {
+        if($_.Length -gt 3 -and (Test-Path $_)) {
+            Get-ChildItem $_ | Remove-Item -Recurse -Force -Verbose:$VerbosePreference
+        } else {
+            Write-Verbose "$($Task.Name) - Path '$_' must be longer than 3 characters."
+        }
+    }
+    exec { dotnet clean --configuration="Release" .\AnsibleTowerClasses\ }
+}
+
+Task IntegrationTests {
+    Microsoft.PowerShell.Management\Push-Location -LiteralPath test
+    try {
+        Import-Module Pester
+        $IntegrationTestOutputFile = "$PSScriptRoot/IntegrationTests.xml"
+        $TestResult = Invoke-Pester -Script @{ Path='./integration'; Parameters=@{ }} -Tag Integration -OutputFile $IntegrationTestOutputFile -OutputFormat "NUnitXml" -PassThru
+        if($env:APPVEYOR_JOB_ID -and (Test-Path $IntegrationTestOutputFile)) {
+            try {
+                $wc = New-Object System.Net.WebClient
+                $wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", $IntegrationTestOutputFile)
+                Write-Host "Uploaded integration test results"
+                Push-AppveyorArtifact -Path $IntegrationTestOutputFile
+                cat $IntegrationTestOutputFile
+            } catch {
+                $e = $_.Exception
+                do {
+                    Write-Host "Error uploading integration test results: $($e.Message)"
+                    $e = $e.innerexception
+                } while ($e)
+            }
+        } else {
+            "Skipping upload integration test results"
+        }
+
+        Assert -Condition {
+            $TestResult.FailedCount -eq 0
+        } -Message "One or more integration tests failed, build cannot continue."
+    } finally {
+        Microsoft.PowerShell.Management\Pop-Location
     }
 }

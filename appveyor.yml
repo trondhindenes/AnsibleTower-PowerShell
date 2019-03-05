@@ -5,6 +5,7 @@ image:
   - Visual Studio 2017
 init:
 - ps:
+- sh: export PATH=/home/appveyor/.local/bin:$PATH
 environment:
   POWERSHELL_TELEMETRY_OPTOUT: 1
   # Avoid expensive initialization of dotnet cli, see: http://donovanbrown.com/post/Stop-wasting-time-during-NET-Core-builds
@@ -24,6 +25,14 @@ install:
 
     install-module pester -force -AllowClobber -SkipPublisherCheck -Scope CurrentUser
     install-module PSScriptAnalyzer -force -AllowClobber -SkipPublisherCheck -Scope CurrentUser
+- sh: sudo curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+- sh: sudo chmod +x /usr/local/bin/docker-compose
+- sh: pip install --user ansible-tower-cli
+test_script:
+- ps: |
+      if($env:OS -ne "Windows_NT") {
+        .\Invoke-Build.ps1 IntegrationTests
+      }
 build_script:
 - ps: |
       if($env:APPVEYOR_REPO_BRANCH -ne "master" -or $env:APPVEYOR_PULL_REQUEST_NUMBER -or $env:APPVEYOR_REPO_COMMIT_MESSAGE -like "skip: *" -or $env:OS -ne "Windows_NT") {

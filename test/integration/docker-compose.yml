@@ -1,0 +1,89 @@
+version: '2.4'
+
+services:
+  web:
+    image: ansible/awx_web:${AWX_WEB_VERSION:-latest}
+    platform: linux
+    depends_on:
+      - rabbitmq
+      - memcached
+      - postgres
+    ports:
+      - 8052:8052
+    hostname: awxweb
+    user: root
+    restart: unless-stopped
+    environment:
+      http_proxy:
+      https_proxy:
+      no_proxy:
+      SECRET_KEY: 5ba3fc41-c82a-47df-a510-e58b7b89b6b9
+      DATABASE_NAME: awx
+      DATABASE_USER: awx
+      DATABASE_PASSWORD: 78f49d98-fe0a-471f-96a3-822d213a04e0
+      DATABASE_PORT: 5432
+      DATABASE_HOST: postgres
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_VHOST: awx
+      MEMCACHED_HOST: memcached
+      MEMCACHED_PORT: 11211
+      AWX_ADMIN_USER: admin
+      AWX_ADMIN_PASSWORD: 7db2d013-21e5-45a1-b242-4e5e07c1b33a
+
+  task:
+    image: ansible/awx_task:${AWX_TASK_VERSION:-latest}
+    platform: linux
+    depends_on:
+      - rabbitmq
+      - memcached
+      - web
+      - postgres
+    hostname: awx
+    user: root
+    restart: unless-stopped
+    environment:
+      http_proxy:
+      https_proxy:
+      no_proxy:
+      SECRET_KEY: 5ba3fc41-c82a-47df-a510-e58b7b89b6b9
+      DATABASE_NAME: awx
+      DATABASE_USER: awx
+      DATABASE_PASSWORD: 78f49d98-fe0a-471f-96a3-822d213a04e0
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      RABBITMQ_USER: guest
+      RABBITMQ_PASSWORD: guest
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_VHOST: awx
+      MEMCACHED_HOST: memcached
+      MEMCACHED_PORT: 11211
+      AWX_ADMIN_USER: admin
+      AWX_ADMIN_PASSWORD: 7db2d013-21e5-45a1-b242-4e5e07c1b33a
+
+  rabbitmq:
+    image: ansible/awx_rabbitmq:3.7.4
+    platform: linux
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_VHOST: awx
+      RABBITMQ_ERLANG_COOKIE: cookiemonster
+
+  memcached:
+    image: memcached:alpine
+    platform: linux
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:9.6
+    platform: linux
+    restart: unless-stopped
+    user: root
+    environment:
+      POSTGRES_USER: awx
+      POSTGRES_PASSWORD: 78f49d98-fe0a-471f-96a3-822d213a04e0
+      POSTGRES_DB: awx
+      PGDATA: /var/lib/postgresql/data/pgdata
