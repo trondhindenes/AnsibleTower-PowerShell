@@ -303,3 +303,10 @@ Task AfterClean -After Clean {
     }
     exec { dotnet clean --configuration="Release" .\AnsibleTowerClasses\ }
 }
+
+Task IntegrationTests Build,{
+    Microsoft.PowerShell.Management\Push-Location -LiteralPath test
+    Import-Module Pester
+    Invoke-Pester -Script @{ Path='.\integration'; Parameters=@{ }} -Tag Integration
+    Microsoft.PowerShell.Management\Pop-Location
+}
