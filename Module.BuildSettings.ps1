@@ -316,15 +316,19 @@ Task IntegrationTests {
         Import-Module Pester
         $IntegrationTestOutputFile = "$PSScriptRoot\IntegrationTests.xml"
         $TestResult = Invoke-Pester -Script @{ Path='.\integration'; Parameters=@{ }} -Tag Integration -OutputFile $IntegrationTestOutputFile -OutputFormat "NUnitXml" -PassThru
-        if($env:APPVEYOR_JOB_ID -and (Test-Path $TestOutputFile)) {
+        if($env:APPVEYOR_JOB_ID -and (Test-Path $IntegrationTestOutputFile)) {
             try {
                 $wc = New-Object System.Net.WebClient
                 $wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", $IntegrationTestOutputFile)
             } catch {
-                Write-Host "Error uploading test results: $($_.Exception.Message)"
+                $e = $_.Exception
+                do {
+                    Write-Host "Error uploading integration test results: $($e.Message)"
+                    $e = $e.exception
+                } while ($e)
             }
         } else {
-            "Skipping upload test results"
+            "Skipping upload integration test results"
         }
 
         Assert -Condition {
