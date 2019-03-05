@@ -28,8 +28,6 @@ install:
 - sh: sudo curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 - sh: sudo chmod +x /usr/local/bin/docker-compose
 - sh: pip install --user ansible-tower-cli
-- sh: sudo cp ~/.local/bin/tower-cli /usr/local/bin
-- sh: echo $PATH
 test_script:
 - ps: |
       if($env:OS -ne "Windows_NT") {
