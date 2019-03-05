@@ -107,6 +107,8 @@ $CatalogVersion = 2
 [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
 $CodeCoverageEnabled = $false
 
+$ExcludeTestTags = @("Integration")
+
 # CodeCoverageFiles specifies the files to perform code coverage analysis on. This property
 # acts as a direct input to the Pester -CodeCoverage parameter, so will support constructions
 # like the ones found here: https://github.com/pester/Pester/wiki/Code-Coverage.
@@ -304,7 +306,7 @@ Task AfterClean -After Clean {
     exec { dotnet clean --configuration="Release" .\AnsibleTowerClasses\ }
 }
 
-Task IntegrationTests Build,{
+Task IntegrationTests {
     Microsoft.PowerShell.Management\Push-Location -LiteralPath test
     Import-Module Pester
     Invoke-Pester -Script @{ Path='.\integration'; Parameters=@{ }} -Tag Integration

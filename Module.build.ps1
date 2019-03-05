@@ -317,12 +317,14 @@ Task Test -If (Get-Module Pester -ListAvailable) Build,{
             $testing = @{
                 OutputFile   = $TestOutputFile
                 OutputFormat = $TestOutputFormat
+                ExcludeTag = $ExcludeTestTags
                 PassThru     = $true
                 Verbose      = $VerbosePreference
             }
         }
         else {
             $testing = @{
+                ExcludeTag = $ExcludeTestTags
                 PassThru     = $true
                 Verbose      = $VerbosePreference
             }

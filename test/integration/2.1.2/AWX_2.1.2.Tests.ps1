@@ -10,16 +10,16 @@ Import-Module $ModulePath -ErrorAction Stop
 $PasswordSS = ConvertTo-SecureString -ASPlainText $Password -Force
 $Credential = New-Object System.Management.Automation.PSCredential("admin", $PasswordSS)
 
-$ComposeFile = Join-Path $PSScriptRoot "../docker-compose.yml"
-
-if($PSBoundParameters.ContainsKey("Url")) {
-    & (Join-Path $PSScriptRoot "../Setup.ps1") -ComposeFile $ComposeFile -Url $Url -Path $PSScriptRoot
-} else {
-    Write-Host "Passing $Url"
-    & (Join-Path $PSScriptRoot "../Setup.ps1") -ComposeFile $ComposeFile -Url $Url -Path $PSScriptRoot -UseCompose
-}
-
 Describe "AWX 2.1.2 Integration" -Tags Integration {
+    $ComposeFile = Join-Path $PSScriptRoot "../docker-compose.yml"
+
+    if($PSBoundParameters.ContainsKey("Url")) {
+        & (Join-Path $PSScriptRoot "../Setup.ps1") -ComposeFile $ComposeFile -Url $Url -Path $PSScriptRoot
+    } else {
+        Write-Host "Passing $Url"
+        & (Join-Path $PSScriptRoot "../Setup.ps1") -ComposeFile $ComposeFile -Url $Url -Path $PSScriptRoot -UseCompose
+    }
+
     It "Connects" {
         { Connect-AnsibleTower -TowerUrl $Url -Credential $Credential } | Should -Not -Throw
     }
@@ -101,10 +101,10 @@ Describe "AWX 2.1.2 Integration" -Tags Integration {
             $User.username | Should -Be $Username
         }
     }
-}
 
-if(!$PSBoundParameters.ContainsKey("Url")) {
-    & (Join-Path $PSScriptRoot "../CleanUp.ps1") -ComposeFile $ComposeFile -Path $PSScriptRoot -UseCompose
-} else {
-    & (Join-Path $PSScriptRoot "../CleanUp.ps1") -ComposeFile $ComposeFile -Path $PSScriptRoot
+    if(!$PSBoundParameters.ContainsKey("Url")) {
+        & (Join-Path $PSScriptRoot "../CleanUp.ps1") -ComposeFile $ComposeFile -Path $PSScriptRoot -UseCompose
+    } else {
+        & (Join-Path $PSScriptRoot "../CleanUp.ps1") -ComposeFile $ComposeFile -Path $PSScriptRoot
+    }
 }

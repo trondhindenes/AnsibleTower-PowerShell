@@ -204,15 +204,6 @@ Function Invoke-PutAnsibleInternalJsonResult
 
     $ItemApiUrl = Join-AnsibleUrl $ItemApiUrl, $id
 
-    $params = @{
-        'Uri' = Join-AnsibleUrl $script:AnsibleUrl, $ItemApiUrl;
-        #'Credential' = $script:AnsibleCredential;
-        'Method' = 'Put';
-        'ContentType' = 'application/json';
-        'Body' = ($InputObject | ConvertTo-Json -Depth 99);
-        'ErrorAction' = 'Stop';
-    }
-
     $Request = @{
         FullPath = $ItemApiUrl
         Method = "PUT"
