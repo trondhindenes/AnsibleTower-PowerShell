@@ -144,7 +144,7 @@ $SettingsPath = "$env:LOCALAPPDATA\Plaster\NewModuleTemplate\SecuredBuildSetting
 # This is typically used to write out test results so that they can be sent to a CI
 # system like AppVeyor.
 [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-$TestOutputFile = "..\PesterResults.xml"
+$TestOutputFile = "$PSScriptRoot\PesterResults.xml"
 
 # Specifies the test output format to use when the TestOutputFile property is given
 # a path.  This parameter is passed through to Invoke-Pester's -OutputFormat parameter.
@@ -286,7 +286,7 @@ Task AfterTest -After Test {
     if($env:APPVEYOR_JOB_ID -and (Test-Path $TestOutputFile)) {
         try {
             $wc = New-Object System.Net.WebClient
-            $wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $TestOutputFile))
+            $wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", $TestOutputFile)
         } catch {
             Write-Host "Error uploading test results: $($_.Exception.Message)"
         }
@@ -314,12 +314,12 @@ Task IntegrationTests {
     Microsoft.PowerShell.Management\Push-Location -LiteralPath test
     try {
         Import-Module Pester
-        $IntegrationTestOutputFile = "../IntegrationTests.xml"
+        $IntegrationTestOutputFile = "$PSScriptRoot\IntegrationTests.xml"
         $TestResult = Invoke-Pester -Script @{ Path='.\integration'; Parameters=@{ }} -Tag Integration -OutputFile $IntegrationTestOutputFile -OutputFormat "NUnitXml" -PassThru
         if($env:APPVEYOR_JOB_ID -and (Test-Path $TestOutputFile)) {
             try {
                 $wc = New-Object System.Net.WebClient
-                $wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $IntegrationTestOutputFile))
+                $wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", $IntegrationTestOutputFile)
             } catch {
                 Write-Host "Error uploading test results: $($_.Exception.Message)"
             }
