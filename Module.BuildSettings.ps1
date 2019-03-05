@@ -144,7 +144,7 @@ $SettingsPath = "$env:LOCALAPPDATA\Plaster\NewModuleTemplate\SecuredBuildSetting
 # This is typically used to write out test results so that they can be sent to a CI
 # system like AppVeyor.
 [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-$TestOutputFile = "$PSScriptRoot\PesterResults.xml"
+$TestOutputFile = "$PSScriptRoot/PesterResults.xml"
 
 # Specifies the test output format to use when the TestOutputFile property is given
 # a path.  This parameter is passed through to Invoke-Pester's -OutputFormat parameter.
@@ -320,6 +320,8 @@ Task IntegrationTests {
             try {
                 $wc = New-Object System.Net.WebClient
                 $wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", $IntegrationTestOutputFile)
+                Write-Host "Uploaded integration test results"
+                Push-AppveyorArtifact -FileName $IntegrationTestOutputFile
             } catch {
                 $e = $_.Exception
                 do {
