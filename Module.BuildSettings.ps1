@@ -324,7 +324,7 @@ Task IntegrationTests {
                 $e = $_.Exception
                 do {
                     Write-Host "Error uploading integration test results: $($e.Message)"
-                    $e = $e.exception
+                    $e = $e.innerexception
                 } while ($e)
             }
         } else {
