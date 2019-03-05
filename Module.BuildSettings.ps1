@@ -308,7 +308,19 @@ Task AfterClean -After Clean {
 
 Task IntegrationTests {
     Microsoft.PowerShell.Management\Push-Location -LiteralPath test
-    Import-Module Pester
-    Invoke-Pester -Script @{ Path='.\integration'; Parameters=@{ }} -Tag Integration
-    Microsoft.PowerShell.Management\Pop-Location
+    try {
+        Import-Module Pester
+        $IntegrationTestOutputFile = "../IntegrationTests.xml"
+        $TestResult = Invoke-Pester -Script @{ Path='.\integration'; Parameters=@{ }} -Tag Integration -OutputFile $IntegrationTestOutputFile -PassThru
+        if($env:APPVEYOR_JOB_ID -and (Test-Path $TestOutputFile)) {
+            $wc = New-Object System.Net.WebClient
+            $wc.UploadFile("https://ci.appveyor.com/api/testresults/xunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $IntegrationTestOutputFile))
+        }
+
+        Assert -Condition {
+            $TestResult.FailedCount -eq 0
+        } -Message "One or more integration tests failed, build cannot continue."
+    } finally {
+        Microsoft.PowerShell.Management\Pop-Location
+    }
 }
