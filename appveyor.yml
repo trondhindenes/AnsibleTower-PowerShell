@@ -35,10 +35,10 @@ test_script:
       }
 build_script:
 - ps: |
-      if($env:APPVEYOR_REPO_BRANCH -ne "master" -or $env:APPVEYOR_PULL_REQUEST_NUMBER -or $env:APPVEYOR_REPO_COMMIT_MESSAGE -like "skip: *" -or $env:OS -ne "Windows_NT") {
-        .\Invoke-Build.ps1 build,test
-      } else {
+      if( $env:APPVEYOR_REPO_BRANCH -eq "master" -and !$env:APPVEYOR_PULL_REQUEST_NUMBER -and $env:APPVEYOR_REPO_COMMIT_MESSAGE -notlike "skip: *" -and $env:OS -eq "Windows_NT" ) {
         .\Invoke-Build.ps1 publish
+      } else {
+        .\Invoke-Build.ps1 build,test
       }
 
 artifacts:
