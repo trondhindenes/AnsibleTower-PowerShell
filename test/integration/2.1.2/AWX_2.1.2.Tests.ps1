@@ -16,7 +16,6 @@ Describe "AWX 2.1.2 Integration" -Tags Integration {
     if($PSBoundParameters.ContainsKey("Url")) {
         & (Join-Path $PSScriptRoot "../Setup.ps1") -ComposeFile $ComposeFile -Url $Url -Path $PSScriptRoot
     } else {
-        Write-Host "Passing $Url"
         & (Join-Path $PSScriptRoot "../Setup.ps1") -ComposeFile $ComposeFile -Url $Url -Path $PSScriptRoot -UseCompose
     }
 
