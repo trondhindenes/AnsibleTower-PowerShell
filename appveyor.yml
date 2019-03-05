@@ -5,6 +5,7 @@ image:
   - ubuntu1804
 init:
 - ps:
+- sh: export PATH=/home/appveyor/.local/bin:$PATH
 environment:
   POWERSHELL_TELEMETRY_OPTOUT: 1
   # Avoid expensive initialization of dotnet cli, see: http://donovanbrown.com/post/Stop-wasting-time-during-NET-Core-builds
