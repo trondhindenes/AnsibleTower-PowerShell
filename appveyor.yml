@@ -4,8 +4,6 @@ image:
   - Visual Studio 2017
   - ubuntu1804
 init:
-- sh: sudo curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-- sh: sudo chmod +x /usr/local/bin/docker-compose
 - ps:
 environment:
   POWERSHELL_TELEMETRY_OPTOUT: 1
@@ -26,6 +24,9 @@ install:
 
     install-module pester -force -AllowClobber -SkipPublisherCheck -Scope CurrentUser
     install-module PSScriptAnalyzer -force -AllowClobber -SkipPublisherCheck -Scope CurrentUser
+- sh: sudo curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+- sh: sudo chmod +x /usr/local/bin/docker-compose
+- sh: pip install ansible-tower-cli
 test_script:
 - ps: |
       if($env:OS -ne "Windows_NT") {
