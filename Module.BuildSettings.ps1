@@ -314,8 +314,8 @@ Task IntegrationTests {
     Microsoft.PowerShell.Management\Push-Location -LiteralPath test
     try {
         Import-Module Pester
-        $IntegrationTestOutputFile = "$PSScriptRoot\IntegrationTests.xml"
-        $TestResult = Invoke-Pester -Script @{ Path='.\integration'; Parameters=@{ }} -Tag Integration -OutputFile $IntegrationTestOutputFile -OutputFormat "NUnitXml" -PassThru
+        $IntegrationTestOutputFile = "$PSScriptRoot/IntegrationTests.xml"
+        $TestResult = Invoke-Pester -Script @{ Path='./integration'; Parameters=@{ }} -Tag Integration -OutputFile $IntegrationTestOutputFile -OutputFormat "NUnitXml" -PassThru
         if($env:APPVEYOR_JOB_ID -and (Test-Path $IntegrationTestOutputFile)) {
             try {
                 $wc = New-Object System.Net.WebClient
