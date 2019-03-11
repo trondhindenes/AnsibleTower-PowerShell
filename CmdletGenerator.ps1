@@ -1,4 +1,4 @@
-
+#requires -Modules FnDsl
 
 function Get-SchemaForType {
     param(
@@ -28,13 +28,15 @@ function New-SchemaCmdlet {
 
         $ExtraPropertyInfo,
 
+        $Description,
+
         $AnsibleTower = $Global:DefaultAnsibleTower
     )
     $Schema = Get-SchemaForType -Type $Type -AnsibleTower $AnsibleTower
 
     switch($Verb) {
         "Get" {
-            New-GetCmdlet -Noun $Noun -Verb $Verb -Schema $Schema -Class $Class -SchemaType $Type -ExtraPropertyInfo $ExtraPropertyInfo
+            New-GetCmdlet -Noun $Noun -Verb $Verb -Schema $Schema -Class $Class -SchemaType $Type -ExtraPropertyInfo $ExtraPropertyInfo -ExcludeProperties $ExcludeProperties -Description $Description
         }
         "Set" {
         }
@@ -59,9 +61,11 @@ function New-GetCmdlet {
 
         $SchemaType,
 
+        $Description,
+
         $ExtraPropertyInfo
     )
-    PSFunction "$Verb-$Noun" -DefaultParameterSetName "PropertyFilter" {
+    PSFunction "$Verb-$Noun" -Description $Description -DefaultParameterSetName "PropertyFilter" {
         $SchemaParameters = $Schema.Actions.Get | Get-Member -MemberType Properties
         $Filters = @()
 
@@ -94,30 +98,26 @@ function New-GetCmdlet {
         PSParam -Name "Id" -ParameterSetName "ById" -Type Int32 -HelpText "The ID of a specific $Noun to get"
         PSParam -Name "AnsibleTower" -DefaultValue '$Global:DefaultAnsibleTower' -HelpText "The Ansibl Tower instance to run against.  If no value is passed the command will run against `$Global:DefaultAnsibleTower."
         PSEnd {
-            $SchemaParameters | ForEach-Object {
-                $SchemaParameter = $Schema.Actions.Get."$SchemaName"
+            PS$ Filter "@{}"
+
+            ($Filters -join "`r`n`r`n") + "`r`n"
+
+            PSIf {PS$ id} {
+                PS$ "Return" (PSExec Invoke-GetAnsibleInternalJsonResult -ItemType `"$SchemaType`" -Id (PS$ Id) -AnsibleTower (PS$ AnsibleTower))
+            } {
+                PS$ "Return" (PSExec Invoke-GetAnsibleInternalJsonResult -ItemType `"$SchemaType`" -Filter (PS$ Filter) -AnsibleTower (PS$ AnsibleTower))
+            } -LB
+
+            PSIf { "!(`$Return)" } {
+                PSExec return
             }
-@"
-        `$Filter = @{}
-$($Filters -join "`r`n`r`n")
-
-        if(`$id) {
-            `$Return = Invoke-GetAnsibleInternalJsonResult -ItemType "$SchemaType" -Id `$Id -AnsibleTower `$AnsibleTower
-        } else {
-            `$Return = Invoke-GetAnsibleInternalJsonResult -ItemType "$SchemaType" -Filter `$Filter -AnsibleTower `$AnsibleTower
-        }
-
-        if(!(`$Return)) {
-            return
-        }
-        foreach(`$ResultObject in `$Return) {
-            `$JsonString = `$ResultObject | ConvertTo-Json
-            `$AnsibleObject = [AnsibleTower.JsonFunctions]::ParseTo$($Schema.Types[0])(`$JsonString)
-            `$AnsibleObject.AnsibleTower = `$AnsibleTower
-            Write-Output `$AnsibleObject
-            `$AnsibleObject = `$Null
-        }
-"@
+            PSForeach {PSExec (PS$ ResultObject) in (PS$ Return)} {
+                PS$ JsonString (PSExec (PS$ ResultObject) "|" ConvertTo-Json)
+                PS$ AnsibleObject "[AnsibleTower.JsonFunctions]::ParseTo$($Schema.Types[0])(`$JsonString)"
+                PS$ AnsibleObject.AnsibleTower (PS$ AnsibleTower)
+                PSExec Write-Output (PS$ AnsibleObject)
+                PS$ AnsibleObject (PS$ Null)
+            }
         }
     }
 }
@@ -212,4 +212,7 @@ function AnsibleGetFilter {
     }
 }
 
-New-SchemaCmdlet -Type projects -Verb Get -Noun AnsibleProject -Class ([AnsibleTower.Project]) -ExtraPropertyInfo @{ Name = @{ Position = 1}; Description = @{ Position = 2}}
+# New-SchemaCmdlet -Type projects -Verb Get -Noun AnsibleProject -Class ([AnsibleTower.Project]) -ExtraPropertyInfo @{ Name = @{ Position = 1}; Description = @{ Position = 2}} -Description "Gets projects from ansible tower." -ExcludeProperties "Type"
+
+# New-SchemaCmdlet -Type teams -Verb Get -Noun AnsibleTeam -Class ([AnsibleTower.Team]) -ExtraPropertyInfo @{ Name = @{ Position = 1}; Description = @{ Position = 2}}
+# New-SchemaCmdlet -Type credentials -Verb Get -Noun AnsibleCredential -Class ([AnsibleTower.Credential]) -ExtraPropertyInfo @{ Name = @{ Position = 1}; Description = @{ Position = 2}} -ExcludeProperties Type,Inputs -Description "Gets credentials configured in Ansible Tower."
