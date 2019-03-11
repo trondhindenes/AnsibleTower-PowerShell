@@ -70,6 +70,7 @@ PowerShellVersion = '3.0'
 FunctionsToExport = @(
     'Add-AnsibleGroupmember',
     'Connect-AnsibleTower',
+    'Get-AnsibleCredential',
     'Get-AnsibleGroup',
     'Get-AnsibleHost',
     'Get-AnsibleInventory',
