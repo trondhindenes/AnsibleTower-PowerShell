@@ -124,7 +124,7 @@ namespace AnsibleTower
         public bool scm_clean { get; set; }
         public bool scm_delete_on_update { get; set; }
         public object credential { get; set; }
-        public DateTime last_job_run { get; set; }
+        public DateTime? last_job_run { get; set; }
         public bool last_job_failed { get; set; }
         public bool has_schedules { get; set; }
         public object next_job_run { get; set; }
@@ -336,6 +336,11 @@ namespace AnsibleTower
 
         public static AnsibleTower.Credential ParseToCredential(string JsonString) {
             AnsibleTower.Credential ConvertedObject = JsonConvert.DeserializeObject<AnsibleTower.Credential>(JsonString);
+            return ConvertedObject;
+        }
+
+        public static AnsibleTower.Project ParseToProject(string JsonString) {
+            AnsibleTower.Project ConvertedObject = JsonConvert.DeserializeObject<AnsibleTower.Project>(JsonString);
             return ConvertedObject;
         }
     }

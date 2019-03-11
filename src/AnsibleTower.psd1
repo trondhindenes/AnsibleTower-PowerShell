@@ -77,6 +77,7 @@ FunctionsToExport = @(
     'Get-AnsibleJobTemplate',
     'Get-AnsibleJobTemplateID',
     'Get-AnsibleOrganization',
+    'Get-AnsibleProject',
     'Get-AnsibleResourceUrl',
     'Get-AnsibleUser',
     'Invoke-AnsibleJob',
