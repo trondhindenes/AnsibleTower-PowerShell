@@ -205,7 +205,7 @@ Task BeforeBuild -Before Build {
 }
 
 # Executes after the Build task.
-Task AfterBuild -After Build {
+Task AfterBuild -if (!$CopyOnly) -After Build {
     try {
         Microsoft.PowerShell.Management\Push-Location -LiteralPath $OutDir
         Import-Module microsoft.powershell.archive

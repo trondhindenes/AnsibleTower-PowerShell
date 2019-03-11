@@ -9,7 +9,9 @@ param(
     $SharedProperties,
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-    $LineSep
+    $LineSep,
+
+    [Switch]$CopyOnly
 )
 
 ###############################################################################
@@ -48,7 +50,7 @@ Task Init {
     }
 }
 
-Task Clean Init, {
+Task Clean -if (!$CopyOnly) Init, {
     # Maybe a bit paranoid but this task nuked \ on my laptop. Good thing I was not running as admin.
     if ($OutDir.Length -gt 3) {
         Get-ChildItem $OutDir | Remove-Item -Recurse -Force -Verbose:$VerbosePreference
@@ -77,7 +79,11 @@ Task StageFiles Init, Clean, {
         Write-Verbose "$($Task.Name) - directory already exists '$ModuleOutDir'."
     }
 
-    Copy-Item -Path $SrcRootDir\* -Destination $ModuleOutDir -Recurse -Exclude $Exclude -Verbose:$VerbosePreference
+    if($CopyOnly) {
+        $ExcludeFiles = $Exclude + "*.dll"
+    }
+
+    Copy-Item -Path $SrcRootDir\* -Destination $ModuleOutDir -Recurse -Exclude $ExcludeFiles -Force -Verbose:$VerbosePreference
 }
 
 Task Build Init, Clean, StageFiles, Analyze, Sign
