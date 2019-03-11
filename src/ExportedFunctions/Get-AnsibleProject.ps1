@@ -97,7 +97,7 @@ function Get-AnsibleProject {
         [Object]$AnsibleTower = $Global:DefaultAnsibleTower
     )
     end {
-                $Filter = @{}
+        $Filter = @{}
         if($PSBoundParameters.ContainsKey("Credential")) {
             switch($Credential.GetType().Fullname) {
                 "AnsibleTower.Credential" {
