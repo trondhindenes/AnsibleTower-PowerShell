@@ -74,7 +74,7 @@ Describe "AWX 2.1.2 Integration" -Tags Integration {
         }
 
         It "Gets the demo project" {
-            $Project = Get-AnsibleProject -Id 1
+            $Project = Get-AnsibleProject -Id 4
             $Project | Should -Not -Be $Null
             $Project.Name | Should -Be "Demo Project"
         }
