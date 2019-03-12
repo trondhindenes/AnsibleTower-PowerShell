@@ -67,6 +67,18 @@ Describe "AWX 3.0.1 Integration" -Tags Integration {
             $User.username | Should -Be "admin"
         }
 
+        It "Gets the demo credential" {
+            $Cred = Get-AnsibleCredential -Id 1
+            $Cred | Should -Not -Be $Null
+            $Cred.Name | Should -Be "Demo Credential"
+        }
+
+        It "Gets the demo project" {
+            $Project = Get-AnsibleProject -Id 1
+            $Project | Should -Not -Be $Null
+            $Project.Name | Should -Be "Demo Project"
+        }
+
         It "Updates the admin user" {
             #Names cannot be more than 30 characters
             $Firstname = [Guid]::NewGuid().ToString().Substring(0, 25)
