@@ -325,7 +325,6 @@ Task IntegrationTests {
                 $wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", $IntegrationTestOutputFile)
                 Write-Host "Uploaded integration test results"
                 Push-AppveyorArtifact -Path $IntegrationTestOutputFile
-                cat $IntegrationTestOutputFile
             } catch {
                 $e = $_.Exception
                 do {
@@ -336,11 +335,10 @@ Task IntegrationTests {
         } else {
             "Skipping upload integration test results"
         }
-
+    } finally {
+        Microsoft.PowerShell.Management\Pop-Location
         Assert -Condition {
             $TestResult.FailedCount -eq 0
         } -Message "One or more integration tests failed, build cannot continue."
-    } finally {
-        Microsoft.PowerShell.Management\Pop-Location
     }
 }
