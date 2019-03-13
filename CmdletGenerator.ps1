@@ -39,8 +39,135 @@ function New-SchemaCmdlet {
             New-GetCmdlet -Noun $Noun -Verb $Verb -Schema $Schema -Class $Class -SchemaType $Type -ExtraPropertyInfo $ExtraPropertyInfo -ExcludeProperties $ExcludeProperties -Description $Description
         }
         "Set" {
+            New-SetCmdlet -Noun $Noun -Verb $Verb -Schema $Schema -Class $Class -SchemaType $Type -ExtraPropertyInfo $ExtraPropertyInfo -ExcludeProperties $ExcludeProperties -Description $Description
         }
         "New" {
+            New-NewCmdlet -Noun $Noun -Verb $Verb -Schema $Schema -Class $Class -SchemaType $Type -ExtraPropertyInfo $ExtraPropertyInfo -ExcludeProperties $ExcludeProperties -Description $Description
+        }
+    }
+}
+
+function New-SetCmdlet {
+    param(
+        [Parameter(Mandatory=$true)]
+        $Noun,
+
+        [Parameter(Mandatory=$true)]
+        $Verb,
+
+        $ExcludeProperties = @("type"),
+
+        $Class,
+
+        $Schema,
+
+        $SchemaType,
+
+        $Description,
+
+        $ExtraPropertyInfo
+    )
+    Write-Debug "Available actions $($Schema.Actions)"
+    _Function "$Verb-$Noun" -Description $Description -SupportsShouldProcess {
+        $SchemaParameters = $Schema.Actions.Post | Get-Member -MemberType Properties
+        Write-Debug "Availabel parameters $($SchemaParameters.Name)"
+
+        _Parameter Id -Type Int32 -ValueFromPipelineByPropertyName -Mandatory -ParameterSetName "ById" -HelpText "The ID of the $SchemaType to update"
+        _Parameter InputObject -Type $Class -ValueFromPipeline -Mandatory -ParameterSetName "ByObject" -HelpText "The object to update"
+
+        $SchemaParameters | ForEach-Object {
+            Write-Debug "Checking schema parameter $($_.Name)"
+            $PSName = ToCamlCase $_.Name
+            $SchemaName = $_.Name
+            $SchemaParameter = $Schema.Actions.Post."$SchemaName"
+            $Mandatory = $SchemaParameter.Required
+            $Type = MapType $SchemaParameter
+
+            $ExtraProperties = @{}
+            if($ExtraPropertyInfo.ContainsKey($PSName)) {
+                $ExtraPropertyInfo[$PSName].Keys | ForEach-Object {
+                    $ExtraProperties[$_] = $ExtraPropertyInfo[$PSName][$_]
+                }
+            }
+
+            _Parameter $PSName -Type $Type -HelpText $SchemaParameter.Help_Text @ExtraProperties
+        }
+        _Parameter -Name "AnsibleTower" -DefaultValue '$Global:DefaultAnsibleTower' -HelpText "The Ansible Tower instance to run against.  If no value is passed the command will run against `$Global:DefaultAnsibleTower."
+
+        _process {
+            _if {_$ Id} {
+                _$ ThisObject (_ "Get-$Noun" -Id (_$ Id) -AnsibleTower (_$ AnsibleTower))
+            } {
+                _$ AnsibleTower (_$ InputObject.AnsibleTower)
+                PSLB
+                _$ ThisObject (_ "Get-$Noun" -Id (_$ InputObject.Id) -AnsibleTower (_$ AnsibleTower))
+            } -lb
+
+            $SchemaParameters | ForEach-Object {
+                $PSName = ToCamlCase $_.Name
+                $SchemaName = $_.Name
+                _if {_$ $PSName} {
+                    _$ ThisObject.$SchemaName (_$ $PSName)
+                } -lb
+            }
+
+            _if { "`$PSCmdlet.ShouldProcess(`$AnsibleTower, `"Update $SchemaType `$(`$ThisObject.Id)`")" } {
+                _$ Result (_ Invoke-PutAnsibleInternalJsonResult -ItemType "$SchemaType" -InputObject (_$ ThisObject) -AnsibleTower (_$ AnsibleTower))
+                PSLB
+                _if { _$ Result } {
+                    _$ JsonString (_ ConvertTo-Json -InputObject (_$ Result))
+                    PSLB
+                    $ClassName = $Class.Split(".")[1]
+                    _$ AnsibleObject "[AnsibleTower.JsonFunctions]::ParseTo${ClassName}(`$JsonString)"
+                    PSLB
+                    _$ AnsibleObject.AnsibleTower (_$ AnsibleTower)
+                    PSLB
+                    _$ AnsibleObject
+                }
+            }
+        }
+    }
+}
+
+function New-NewCmdlet {
+    param(
+        [Parameter(Mandatory=$true)]
+        $Noun,
+
+        [Parameter(Mandatory=$true)]
+        $Verb,
+
+        $ExcludeProperties = @("type"),
+
+        $Class,
+
+        $Schema,
+
+        $SchemaType,
+
+        $Description,
+
+        $ExtraPropertyInfo
+    )
+    _Function "$Verb-$Noun" -Description $Description {
+        $SchemaParameters = $Schema.Actions.Post | Get-Member -MemberType Properties
+
+        $SchemaParameters | ForEach-Object {
+            $PSName = ToCamlCase $_.Name
+            $SchemaName = $_.Name
+            $SchemaParameter = $Schema.Actions.Post."$SchemaName"
+            $Mandatory = $SchemaParameter.Required
+            $Type = MapType $SchemaParameter
+
+            $ExtraProperties = @{}
+            if($ExtraPropertyInfo.ContainsKey($PSName)) {
+                $ExtraPropertyInfo[$PSName].Keys | ForEach-Object {
+                    $ExtraProperties[$_] = $ExtraPropertyInfo[$PSName][$_]
+                }
+            }
+
+            _Parameter $PSName -Type $Type -HelpText $SchemaParameter.Help_Text @ExtraProperties
+            _Parameter -Name "AnsibleTower" -DefaultValue '$Global:DefaultAnsibleTower' -HelpText "The Ansible Tower instance to run against.  If no value is passed the command will run against `$Global:DefaultAnsibleTower."
         }
     }
 }
@@ -235,7 +362,7 @@ $Credential = @{
     Type = "credential"
     Verb = "Get"
     Noun = "AnsibleCredential"
-    Class = [AnsibleTower.Credential]
+    Class = "AnsibleTower.Credential"
     ExtraPropertyInfo = @{
         Name = @{ Position = 1};
         Description = @{ Position = 2}
@@ -251,7 +378,7 @@ $CredentialType = @{
     Type = "credential_types"
     Verb = "Get"
     Noun = "AnsibleCredentialType"
-    Class = "[AnsibleTower.CredentialType]"
+    Class = "AnsibleTower.CredentialType"
     ExtraPropertyInfo = @{
         Name = @{ Position = 1};
         Description = @{ Position = 2}
@@ -268,7 +395,7 @@ $Inventory = @{
     Type = "inventories"
     Verb = "Get"
     Noun = "AnsibleInventory"
-    Class = "[AnsibleTower.Inventory]"
+    Class = "AnsibleTower.Inventory"
     ExtraPropertyInfo = @{
         Name = @{ Position = 1};
         Description = @{ Position = 2}
@@ -286,7 +413,7 @@ $AHost = @{
     Type = "hosts"
     Verb = "Get"
     Noun = "AnsibleHost"
-    Class = "[AnsibleTower.Host]"
+    Class = "AnsibleTower.Host"
     ExtraPropertyInfo = @{
         Name = @{ Position = 1};
         Inventory = @{ Position = 2}
@@ -304,7 +431,7 @@ $Job = @{
     Type = "jobs"
     Verb = "Get"
     Noun = "AnsibleJob"
-    Class = "[AnsibleTower.Job]"
+    Class = "AnsibleTower.Job"
     ExtraPropertyInfo = @{
         Name = @{ Position = 1};
         Inventory = @{ Position = 2}
@@ -322,7 +449,7 @@ $Schedule = @{
     Type = "schedules"
     Verb = "Get"
     Noun = "AnsibleSchedule"
-    Class = "[AnsibleTower.Schedule]"
+    Class = "AnsibleTower.Schedule"
     ExtraPropertyInfo = @{
         Name = @{ Position = 1};
         Inventory = @{ Position = 2}
@@ -339,7 +466,7 @@ $WorkflowJob = @{
     Type = "workflow_jobs"
     Verb = "Get"
     Noun = "AnsibleWorkflowJob"
-    Class = "[AnsibleTower.WorkflowJob]"
+    Class = "AnsibleTower.WorkflowJob"
     ExtraPropertyInfo = @{
         Name = @{ Position = 1};
         Inventory = @{ Position = 2}
@@ -356,7 +483,7 @@ $WorkflowJobTemplate = @{
     Type = "workflow_job_templates"
     Verb = "Get"
     Noun = "AnsibleWorkflowJobTemplate"
-    Class = "[AnsibleTower.WorkflowJobTemplate]"
+    Class = "AnsibleTower.WorkflowJobTemplate"
     ExtraPropertyInfo = @{
         Name = @{ Position = 1};
         Inventory = @{ Position = 2}
@@ -366,4 +493,39 @@ $WorkflowJobTemplate = @{
     Description = "Gets workflow job templates defined in Ansible Tower."
 }
 New-SchemaCmdlet @WorkflowJobTemplate
+#>
+
+<#
+$NewGroup = @{
+    Type = "groups"
+    Verb = "New"
+    Noun = "AnsibleGroup"
+    Class = "AnsibleTower.Group"
+    ExtraPropertyInfo = @{
+        Name = @{ Position = 1};
+        Inventory = @{ Position = 2}
+        Organization = @{ Position = 3}
+    }
+    ExcludeProperties = @("type")
+    Description = "Creates a new group in an inventory in Ansible Tower."
+}
+New-SchemaCmdlet @NewGroup
+#>
+
+
+<#
+$SetProject = @{
+    Type = "projects"
+    Verb = "Set"
+    Noun = "AnsibleProject"
+    Class = "AnsibleTower.Project"
+    ExtraPropertyInfo = @{
+        Name = @{ Position = 1};
+        Inventory = @{ Position = 2}
+        Organization = @{ Position = 3}
+    }
+    ExcludeProperties = @("type")
+    Description = "Updates an existing project in Ansible Tower."
+}
+New-SchemaCmdlet @SetProject
 #>
