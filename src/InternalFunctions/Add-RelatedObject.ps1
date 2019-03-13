@@ -10,6 +10,7 @@ function Add-RelatedObject {
     )
     $Relations = Invoke-GetAnsibleInternalJsonResult -ItemType $ItemType -Id $InputObject.Id -ItemSubItem $RelatedType -AnsibleTower $InputObject.AnsibleTower
     foreach($Relation in $Relations) {
+        Write-Debug "Adding $RelatedType $($Relation.Id) to $ItemType $($InputObject.Id)"
         if(!$Cache.ContainsKey($Relation.Id)) {
             $Cache[$Relation.Id] = &$RelationCommand -Id $Relation.Id -AnsibleTower $InputObject.AnsibleTower
         }
@@ -17,7 +18,7 @@ function Add-RelatedObject {
         if(!$InputObject."$RelationProperty") {
             $InputObject."$RelationProperty" = $RelatedObject
         } else {
-            $InputOjbect."$RelationProperty".Add($RelatedObject)
+            $InputObject."$RelationProperty".Add($RelatedObject)
         }
     }
     if($PassThru) {
