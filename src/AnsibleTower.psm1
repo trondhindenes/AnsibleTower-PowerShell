@@ -195,13 +195,15 @@ Function Invoke-PutAnsibleInternalJsonResult
 {
     Param (
         $ItemType,
-        $InputObject
+        $InputObject,
+        $AnsibleTower
     )
 
-    if (!$script:AnsibleUrl -or !$script:AnsibleCredential) {
+    $me = Test-AnsibleTower -AnsibleTower $AnsibleTower
+    if (!$me) {
         throw "You need to connect first, use Connect-AnsibleTower";
     }
-    $ItemApiUrl = Get-AnsibleResourceUrl $ItemType
+    $ItemApiUrl = Get-AnsibleResourceUrl $ItemType  -AnsibleTower $AnsibleTower
 
     $id = $InputObject.id
 
