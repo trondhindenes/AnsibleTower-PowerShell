@@ -43,7 +43,7 @@ Function Set-AnsibleUser
         if ($Password) {$ThisUser.password = $Password}
 
         if($PSCmdlet.ShouldProcess($AnsibleTower, "Update user $($ThisUser.Username)")) {
-            $result = Invoke-PutAnsibleInternalJsonResult -ItemType "users" -InputObject $ThisUser
+            $result = Invoke-PutAnsibleInternalJsonResult -ItemType "users" -InputObject $ThisUser -AnsibleTower $AnsibleTower
             if ($result)
             {
                 $JsonString = $Result | ConvertTo-Json
