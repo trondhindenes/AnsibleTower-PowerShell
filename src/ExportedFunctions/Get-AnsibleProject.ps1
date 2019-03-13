@@ -43,6 +43,10 @@
 #>
 function Get-AnsibleProject {
     [CmdletBinding(DefaultParameterSetname='PropertyFilter')]
+    [OutputType([AnsibleTower.Project])]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingPlainTextForPassword", "Credential")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUsePSCredentialType","")]
     param(
         [Parameter(ParameterSetName='PropertyFilter')]
         [Object]$Credential,
