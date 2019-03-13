@@ -317,6 +317,53 @@ namespace AnsibleTower
         public int? verbosity { get; set; }
     }
 
+    public class WorkflowJob : IAnsibleObject {
+        public Tower AnsibleTower { get; set; }
+        public bool allow_simultaneous { get; set; }
+        public DateTime created { get; set; }
+        public string description { get; set; }
+        public double elapsed { get; set; }
+        public string extra_vars { get; set; }
+        public bool failed { get; set; }
+        public DateTime? finished { get; set; }
+        public int id { get; set; }
+        public bool is_sliced_job { get; set; }
+        public object inventory { get; set; }
+        public string job_explanation { get; set; }
+        public object job_template { get; set; }
+        public string launch_type { get; set; }
+        public DateTime modified { get; set; }
+        public string name { get; set; }
+        public DateTime? started { get; set; }
+        public string status { get; set; }
+        public string type { get; set; }
+        public object unified_job_template { get; set; }
+        public string url { get; set; }
+        public object workflow_job_template { get; set; }
+    }
+
+    public class WorkflowJobTemplate : IAnsibleObject {
+        public Tower AnsibleTower { get; set; }
+        public bool allow_simultaneous { get; set; }
+        public bool ask_inventory_on_launch { get; set; }
+        public bool ask_variables_on_launch { get; set; }
+        public DateTime created { get; set; }
+        public string description { get; set; }
+        public string extra_vars { get; set; }
+        public int id { get; set; }
+        public object inventory { get; set; }
+        public bool last_job_failed { get; set; }
+        public DateTime? last_job_run { get; set; }
+        public DateTime modified { get; set; }
+        public string name { get; set; }
+        public DateTime? next_job_run { get; set; }
+        public object organization { get; set; }
+        public string status { get; set; }
+        public bool survey_enabled { get; set; }
+        public string type { get; set; }
+        public string url { get; set; }
+    }
+
 
 
 
@@ -399,6 +446,16 @@ namespace AnsibleTower
 
         public static AnsibleTower.Schedule ParseToSchedule(string JsonString) {
             AnsibleTower.Schedule ConvertedObject = JsonConvert.DeserializeObject<AnsibleTower.Schedule>(JsonString);
+            return ConvertedObject;
+        }
+
+        public static AnsibleTower.WorkflowJob ParseToWorkflowJob(string JsonString) {
+            AnsibleTower.WorkflowJob ConvertedObject = JsonConvert.DeserializeObject<AnsibleTower.WorkflowJob>(JsonString);
+            return ConvertedObject;
+        }
+
+        public static AnsibleTower.WorkflowJobTemplate ParseToWorkflowJobTemplate(string JsonString) {
+            AnsibleTower.WorkflowJobTemplate ConvertedObject = JsonConvert.DeserializeObject<AnsibleTower.WorkflowJobTemplate>(JsonString);
             return ConvertedObject;
         }
     }
