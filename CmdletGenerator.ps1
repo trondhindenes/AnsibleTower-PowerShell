@@ -309,3 +309,21 @@ $Job = @{
 }
 New-SchemaCmdlet @Job
 #>
+
+<#
+$Schedule = @{
+    Type = "schedules"
+    Verb = "Get"
+    Noun = "AnsibleSchedule"
+    Class = "[AnsibleTower.Schedule]"
+    ExtraPropertyInfo = @{
+        Name = @{ Position = 1};
+        Inventory = @{ Position = 2}
+        Project = @{ Position = 3}
+        Id = @{ ValueFromPipelineByPropertyName = $true }
+    }
+    ExcludeProperties = @("type","extra_data")
+    Description = "Gets schedules defined in Ansible Tower."
+}
+New-SchemaCmdlet @Schedule
+#>
