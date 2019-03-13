@@ -83,6 +83,7 @@ FunctionsToExport = @(
     'Get-AnsibleSchedule',
     'Get-AnsibleResourceUrl',
     'Get-AnsibleUser',
+    'Get-AnsibleWorkflowJob',
     'Invoke-AnsibleJob',
     'Invoke-AnsibleJobTemplate',
     'Invoke-AnsibleRequest',
