@@ -65,7 +65,7 @@ function New-GetCmdlet {
 
         $ExtraPropertyInfo
     )
-    PSFunction "$Verb-$Noun" -Description $Description -DefaultParameterSetName "PropertyFilter" {
+    _Function "$Verb-$Noun" -Description $Description -DefaultParameterSetName "PropertyFilter" {
         $SchemaParameters = $Schema.Actions.Get | Get-Member -MemberType Properties
         $Filters = @()
 
@@ -90,33 +90,39 @@ function New-GetCmdlet {
                         $ExtraProperties[$_] = $ExtraPropertyInfo[$PSName][$_]
                     }
                 }
-                PSParam $PSName -Type $Type @ExtraProperties -HelpText $SchemaParameter.help_text
+                _Parameter $PSName -Type $Type @ExtraProperties -HelpText $SchemaParameter.help_text
                 $Filters += AnsibleGetFilter -PSName $PSName -SchemaName $SchemaName -PSType $Type
             }
 
         }
-        PSParam -Name "Id" -ParameterSetName "ById" -Type Int32 -HelpText "The ID of a specific $Noun to get"
-        PSParam -Name "AnsibleTower" -DefaultValue '$Global:DefaultAnsibleTower' -HelpText "The Ansibl Tower instance to run against.  If no value is passed the command will run against `$Global:DefaultAnsibleTower."
-        PSEnd {
-            PS$ Filter "@{}"
+        $IdExtras = @{}
+        if($ExtraPropertyInfo.ContainsKey("Id")) {
+            $ExtraPropertyInfo["Id"].Keys | ForEach-Object {
+                $IdExtras[$_] = $ExtraPropertyInfo["Id"][$_]
+            }
+        }
+        _Parameter -Name "Id" -ParameterSetName "ById" -Type Int32 -HelpText "The ID of a specific $Noun to get" @IdExtras
+        _Parameter -Name "AnsibleTower" -DefaultValue '$Global:DefaultAnsibleTower' -HelpText "The Ansible Tower instance to run against.  If no value is passed the command will run against `$Global:DefaultAnsibleTower."
+        _End {
+            _$ Filter "@{}"
 
             ($Filters -join "`r`n`r`n") + "`r`n"
 
-            PSIf {PS$ id} {
-                PS$ "Return" (PSExec Invoke-GetAnsibleInternalJsonResult -ItemType `"$SchemaType`" -Id (PS$ Id) -AnsibleTower (PS$ AnsibleTower))
+            _If {_$ id} {
+                _$ "Return" (_ Invoke-GetAnsibleInternalJsonResult -ItemType `"$SchemaType`" -Id (_$ Id) -AnsibleTower (_$ AnsibleTower))
             } {
-                PS$ "Return" (PSExec Invoke-GetAnsibleInternalJsonResult -ItemType `"$SchemaType`" -Filter (PS$ Filter) -AnsibleTower (PS$ AnsibleTower))
+                _$ "Return" (_ Invoke-GetAnsibleInternalJsonResult -ItemType `"$SchemaType`" -Filter (_$ Filter) -AnsibleTower (_$ AnsibleTower))
             } -LB
 
-            PSIf { "!(`$Return)" } {
-                PSExec return
+            _If { "!(`$Return)" } {
+                _ return
             }
-            PSForeach {PSExec (PS$ ResultObject) in (PS$ Return)} {
-                PS$ JsonString (PSExec (PS$ ResultObject) "|" ConvertTo-Json)
-                PS$ AnsibleObject "[AnsibleTower.JsonFunctions]::ParseTo$($Schema.Types[0])(`$JsonString)"
-                PS$ AnsibleObject.AnsibleTower (PS$ AnsibleTower)
-                PSExec Write-Output (PS$ AnsibleObject)
-                PS$ AnsibleObject (PS$ Null)
+            _Foreach {_ (_$ ResultObject) in (_$ Return)} {
+                _$ JsonString (_ (_$ ResultObject) "|" ConvertTo-Json)
+                _$ AnsibleObject "[AnsibleTower.JsonFunctions]::ParseTo$($Schema.Types[0])(`$JsonString)"
+                _$ AnsibleObject.AnsibleTower (_$ AnsibleTower)
+                _ Write-Output (_$ AnsibleObject)
+                _$ AnsibleObject (_$ Null)
             }
         }
     }
@@ -137,7 +143,7 @@ function MapType {
     )
     switch($Property.Type) {
         "boolean" {
-            "bool"
+            "switch"
         }
         "choice" {
             "string"
@@ -216,3 +222,90 @@ function AnsibleGetFilter {
 
 # New-SchemaCmdlet -Type teams -Verb Get -Noun AnsibleTeam -Class ([AnsibleTower.Team]) -ExtraPropertyInfo @{ Name = @{ Position = 1}; Description = @{ Position = 2}}
 # New-SchemaCmdlet -Type credentials -Verb Get -Noun AnsibleCredential -Class ([AnsibleTower.Credential]) -ExtraPropertyInfo @{ Name = @{ Position = 1}; Description = @{ Position = 2}} -ExcludeProperties Type,Inputs -Description "Gets credentials configured in Ansible Tower."
+
+<#
+$Credential = @{
+    Type = "credential"
+    Verb = "Get"
+    Noun = "AnsibleCredential"
+    Class = [AnsibleTower.Credential]
+    ExtraPropertyInfo = @{
+        Name = @{ Position = 1};
+        Description = @{ Position = 2}
+    }
+    ExcludeProperties = @("Type","Inputs")
+    Description = "Gets credentials configured in Ansible Tower."
+}
+New-SchemaCmdlet @Credential
+#>
+
+<#
+$CredentialType = @{
+    Type = "credential_types"
+    Verb = "Get"
+    Noun = "AnsibleCredentialType"
+    Class = "[AnsibleTower.CredentialType]"
+    ExtraPropertyInfo = @{
+        Name = @{ Position = 1};
+        Description = @{ Position = 2}
+        Kind = @{ Position = 3}
+    }
+    ExcludeProperties = @("Type")
+    Description = "Gets credential types configured in Ansible Tower."
+}
+New-SchemaCmdlet @CredentialType
+#>
+
+<#
+$Inventory = @{
+    Type = "inventories"
+    Verb = "Get"
+    Noun = "AnsibleInventory"
+    Class = "[AnsibleTower.Inventory]"
+    ExtraPropertyInfo = @{
+        Name = @{ Position = 1};
+        Description = @{ Position = 2}
+        Organization = @{ Position = 3}
+    }
+    ExcludeProperties = @("Type")
+    Description = "Gets inventories defined in Ansible Tower."
+}
+New-SchemaCmdlet @Inventory
+#>
+
+
+<#
+$AHost = @{
+    Type = "hosts"
+    Verb = "Get"
+    Noun = "AnsibleHost"
+    Class = "[AnsibleTower.Host]"
+    ExtraPropertyInfo = @{
+        Name = @{ Position = 1};
+        Inventory = @{ Position = 2}
+        Group = @{ Position = 3}
+        Id = @{ ValueFromPipelineByPropertyName = $true }
+    }
+    ExcludeProperties = @("type","last_job_host_summary")
+    Description = "Gets hosts defined in Ansible Tower."
+}
+New-SchemaCmdlet @AHost
+#>
+
+<#
+$Job = @{
+    Type = "jobs"
+    Verb = "Get"
+    Noun = "AnsibleJob"
+    Class = "[AnsibleTower.Job]"
+    ExtraPropertyInfo = @{
+        Name = @{ Position = 1};
+        Inventory = @{ Position = 2}
+        Project = @{ Position = 3}
+        Id = @{ ValueFromPipelineByPropertyName = $true }
+    }
+    ExcludeProperties = @("type","artifacts","start_at_task")
+    Description = "Gets job status from Ansible Tower."
+}
+New-SchemaCmdlet @Job
+#>
