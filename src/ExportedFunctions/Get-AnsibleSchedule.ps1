@@ -36,7 +36,7 @@ function Get-AnsibleSchedule {
         [Parameter(ParameterSetName='PropertyFilter')]
         [Object]$UnifiedJobTemplate,
 
-        [Parameter(ValueFromPipelineByPropertyName=$true,ParameterSetName='ById')]
+        [Parameter(ParameterSetName='ById')]
         [Int32]$Id,
 
         $AnsibleTower = $Global:DefaultAnsibleTower

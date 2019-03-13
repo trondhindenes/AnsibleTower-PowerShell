@@ -320,7 +320,6 @@ $Schedule = @{
         Name = @{ Position = 1};
         Inventory = @{ Position = 2}
         Project = @{ Position = 3}
-        Id = @{ ValueFromPipelineByPropertyName = $true }
     }
     ExcludeProperties = @("type","extra_data")
     Description = "Gets schedules defined in Ansible Tower."
