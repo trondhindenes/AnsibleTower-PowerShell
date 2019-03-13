@@ -139,6 +139,7 @@ function Invoke-GetAnsibleInternalJsonResult
     }
 
     Write-Verbose ("Invoke-GetAnsibleInternalJsonResult: Invoking url [{0}]" -f $ItemApiUrl);
+    $invokeResult = Invoke-AnsibleRequest -FullPath $ItemApiUrl -AnsibleTower $AnsibleTower -QueryParameters $Filter
     do {
         $invokeResult = Invoke-AnsibleRequest -FullPath $ItemApiUrl -AnsibleTower $AnsibleTower -QueryParameters $Filter
         if ($invokeResult.id) {
@@ -148,6 +149,8 @@ function Invoke-GetAnsibleInternalJsonResult
             Write-Output $invokeResult.results
         }
         $ItemApiUrl = $InvokeResult.Next
+        #Don't add filter query string after the first run
+        $Filter = @{}
     } while($ItemApiUrl)
 }
 
