@@ -71,6 +71,7 @@ FunctionsToExport = @(
     'Add-AnsibleGroupmember',
     'Connect-AnsibleTower',
     'Get-AnsibleCredential',
+    'Get-AnsibleCredentialType',
     'Get-AnsibleGroup',
     'Get-AnsibleHost',
     'Get-AnsibleInventory',
