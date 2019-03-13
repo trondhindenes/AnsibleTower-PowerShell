@@ -22,6 +22,8 @@
 #>
 function Get-AnsibleCredential {
     [CmdletBinding(DefaultParameterSetname='PropertyFilter')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingPlainTextForPassword", "CredentialType")]
     param(
         [Parameter(ParameterSetName='PropertyFilter')]
         [Object]$CredentialType,
