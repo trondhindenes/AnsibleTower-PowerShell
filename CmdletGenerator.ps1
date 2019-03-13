@@ -350,3 +350,20 @@ $WorkflowJob = @{
 }
 New-SchemaCmdlet @WorkflowJob
 #>
+
+<#
+$WorkflowJobTemplate = @{
+    Type = "workflow_job_templates"
+    Verb = "Get"
+    Noun = "AnsibleWorkflowJobTemplate"
+    Class = "[AnsibleTower.WorkflowJobTemplate]"
+    ExtraPropertyInfo = @{
+        Name = @{ Position = 1};
+        Inventory = @{ Position = 2}
+        Organization = @{ Position = 3}
+    }
+    ExcludeProperties = @("type")
+    Description = "Gets workflow job templates defined in Ansible Tower."
+}
+New-SchemaCmdlet @WorkflowJobTemplate
+#>
