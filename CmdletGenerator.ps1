@@ -75,7 +75,7 @@ function New-GetCmdlet {
             $SchemaParameter = $Schema.Actions.Get."$SchemaName"
             $Filterable = $SchemaParameter.Filterable
             $Type = MapType $SchemaParameter
-            if($Filterable -and $ExcludeProperties -NotContains $SchemaName -and $Type -in @("String","Bool","Object")) {
+            if($Filterable -and $ExcludeProperties -NotContains $SchemaName -and $Type -in @("String","Bool","Object","Switch")) {
                 $ExtraProperties = @{}
                 if($SchemaParameter.Type -eq "Choice") {
                     $ExtraProperties["ValidateSet"] = $SchemaParameter.choices | ForEach-Object {$_[0]}
@@ -185,6 +185,13 @@ function AnsibleGetFilter {
 "@
         }
         "bool" {
+@"
+        if(`$PSBoundParameters.ContainsKey("$PSName")) {
+            `$Filter["$SchemaName"] = `$$PSName
+        }
+"@
+        }
+        "switch" {
 @"
         if(`$PSBoundParameters.ContainsKey("$PSName")) {
             `$Filter["$SchemaName"] = `$$PSName
@@ -325,4 +332,21 @@ $Schedule = @{
     Description = "Gets schedules defined in Ansible Tower."
 }
 New-SchemaCmdlet @Schedule
+#>
+
+<#
+$WorkflowJob = @{
+    Type = "workflow_jobs"
+    Verb = "Get"
+    Noun = "AnsibleWorkflowJob"
+    Class = "[AnsibleTower.WorkflowJob]"
+    ExtraPropertyInfo = @{
+        Name = @{ Position = 1};
+        Inventory = @{ Position = 2}
+        Project = @{ Position = 3}
+    }
+    ExcludeProperties = @("type")
+    Description = "Gets workflow jobs defined in Ansible Tower."
+}
+New-SchemaCmdlet @WorkflowJob
 #>
