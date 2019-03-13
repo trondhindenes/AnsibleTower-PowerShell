@@ -12,6 +12,7 @@ namespace AnsibleTower
         string type { get; set; }
         string url { get; set; }
         DateTime created { get; set; }
+        Tower AnsibleTower { get; set; }
     }
     public class Application : IAnsibleObject
     {
@@ -57,6 +58,21 @@ namespace AnsibleTower
         public int credential_type { get; set; }
         public Hashtable inputs { get; set; }
         public List<IAnsibleObject> Owners { get; set; }
+        public Tower AnsibleTower { get; set; }
+    }
+
+    public class CredentialType : IAnsibleObject {
+        public int id { get; set; }
+        public string type { get; set; }
+        public string url { get; set; }
+        public DateTime created { get; set; }
+        public DateTime modified { get; set; }
+        public string name { get; set; }
+        public string description { get; set; }
+        public string kind { get; set; }
+        public bool managed_by_tower { get; set; }
+        //public string inputs { get; set; }
+        //public string injectors { get; set; }
         public Tower AnsibleTower { get; set; }
     }
 
@@ -164,34 +180,39 @@ namespace AnsibleTower
 
     public class Job : IAnsibleObject
     {
-        public int id { get; set; }
-        public string type { get; set; }
-        public string url { get; set; }
+        public Tower AnsibleTower { get; set; }
+        public string controller_node { get; set; }
         public DateTime created { get; set; }
-        public string name { get; set; }
         public string description { get; set; }
-        public int unified_job_template { get; set; }
-        public string launch_type { get; set; }
-        public string status { get; set; }
-        public bool failed { get; set; }
         public double elapsed { get; set; }
-        public string job_explanation { get; set; }
-        public string job_type { get; set; }
-        public object inventory { get; set; }
-        public object project { get; set; }
-        public string playbook { get; set; }
-        //public object credential { get; set; }
-        //public object cloud_credential { get; set; }
-        public int forks { get; set; }
-        public string limit { get; set; }
-        public int verbosity { get; set; }
+        public string execution_node { get; set; }
         public string extra_vars { get; set; }
+        public bool failed { get; set; }
+        public DateTime? finished { get; set; }
+        public int forks { get; set; }
+        public int id { get; set; }
+        public object instance_group { get; set; }
+        public object inventory { get; set; }
+        public string job_explanation { get; set; }
         public string job_tags { get; set; }
         public int job_template { get; set; }
+        public string job_type { get; set; }
+        public string launch_type { get; set; }
+        public string limit { get; set; }
+        public string name { get; set; }
+        public string playbook { get; set; }
+        public object project { get; set; }
         public string result_stdout { get; set; }
+        public string scm_revision { get; set; }
+        public string skip_tags { get; set; }
         public DateTime? started { get; set; }
-        public DateTime? finished { get; set; }
-        public Tower AnsibleTower { get; set; }
+        public string status { get; set; }
+        public string type { get; set; }
+        public int unified_job_template { get; set; }
+        public string url { get; set; }
+        //public object credential { get; set; }
+        //public object cloud_credential { get; set; }
+        public int verbosity { get; set; }
     }
 
     public class Inventory : IAnsibleObject
@@ -294,13 +315,13 @@ namespace AnsibleTower
             return ConvertedObject;
         }
 
-        public AnsibleTower.Job ParseToJob(string JsonString)
+        public static AnsibleTower.Job ParseToJob(string JsonString)
         {
             AnsibleTower.Job ConvertedObject = JsonConvert.DeserializeObject<AnsibleTower.Job>(JsonString);
             return ConvertedObject;
         }
 
-        public AnsibleTower.Inventory ParseToInventory(string JsonString)
+        public static AnsibleTower.Inventory ParseToInventory(string JsonString)
         {
             AnsibleTower.Inventory ConvertedObject = JsonConvert.DeserializeObject<AnsibleTower.Inventory>(JsonString);
             return ConvertedObject;
@@ -341,6 +362,11 @@ namespace AnsibleTower
 
         public static AnsibleTower.Project ParseToProject(string JsonString) {
             AnsibleTower.Project ConvertedObject = JsonConvert.DeserializeObject<AnsibleTower.Project>(JsonString);
+            return ConvertedObject;
+        }
+
+        public static AnsibleTower.CredentialType ParseToCredentialType(string JsonString) {
+            AnsibleTower.CredentialType ConvertedObject = JsonConvert.DeserializeObject<AnsibleTower.CredentialType>(JsonString);
             return ConvertedObject;
         }
     }
