@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
+using System.Runtime.Caching;
 
 namespace AnsibleTower
 {
@@ -10,6 +11,7 @@ namespace AnsibleTower
     {
         public Tower () {
             this.Endpoints = new Dictionary<string,string>();
+            this.Cache = new MemoryCache("AnsibleTower");
         }
 
         public string AnsibleUrl { get; set; }
@@ -25,5 +27,7 @@ namespace AnsibleTower
                 return "";
             }
         }
+
+        public MemoryCache Cache { get; private set; }
     }
 }
