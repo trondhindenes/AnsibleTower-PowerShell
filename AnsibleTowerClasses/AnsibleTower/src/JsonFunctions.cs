@@ -96,5 +96,17 @@ namespace AnsibleTower
             AnsibleTower.WorkflowJobTemplate ConvertedObject = JsonConvert.DeserializeObject<AnsibleTower.WorkflowJobTemplate>(JsonString);
             return ConvertedObject;
         }
+
+        public static AnsibleTower.Role ParseToRole(string JsonString) {
+            JObject Json = JObject.Parse(JsonString);
+            AnsibleTower.Role ConvertedObject = JsonConvert.DeserializeObject<AnsibleTower.Role>(Json.ToString());
+            ConvertedObject.resource_name = (string)Json.SelectToken("summary_fields.resource_name");
+            ConvertedObject.resource_type = (string)Json.SelectToken("summary_fields.resource_type");
+            return ConvertedObject;
+        }
+        public static AnsibleTower.Team ParseToTeam(string JsonString) {
+            AnsibleTower.Team ConvertedObject = JsonConvert.DeserializeObject<AnsibleTower.Team>(JsonString);
+            return ConvertedObject;
+        }
     }
 }
