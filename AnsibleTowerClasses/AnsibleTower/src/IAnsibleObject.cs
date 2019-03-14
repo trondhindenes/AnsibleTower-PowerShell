@@ -10,7 +10,6 @@ namespace AnsibleTower
         int id { get; set; }
         string type { get; set; }
         string url { get; set; }
-        DateTime created { get; set; }
         Tower AnsibleTower { get; set; }
     }
 }
