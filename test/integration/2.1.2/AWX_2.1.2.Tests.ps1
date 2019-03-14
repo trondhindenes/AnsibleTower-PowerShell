@@ -35,6 +35,11 @@ Describe "AWX 2.1.2 Integration" -Tags Integration {
             $Inv.Name | Should -Be "Demo Inventory"
         }
 
+        It "Sets AnsibleTower on inventories" {
+            $Inv = Get-AnsibleInventory -Name "Demo Inventory"
+            $Inv.AnsibleTower | Should -Not -Be $Null
+        }
+
         <#  NOT IMPLEMENTED
         It "Gets the demo project" {
             $Project = Get-AnsibleProject -Name "Demo Project"
@@ -49,6 +54,11 @@ Describe "AWX 2.1.2 Integration" -Tags Integration {
             $H.Name | Should -Be "localhost"
         }
 
+        It "Sets AnsibleTower on hosts" {
+            $H = Get-AnsibleHost -Name localhost -Inventory "Demo Inventory"
+            $H.AnsibleTower | Should -Not -Be $null
+        }
+
         It "Gets the demo job template" {
             $jt = Get-AnsibleJobTemplate -Name "Demo Job Template"
             $jt | Should -Not -Be $Null
@@ -59,6 +69,11 @@ Describe "AWX 2.1.2 Integration" -Tags Integration {
             $Org = Get-AnsibleOrganization -Name Default
             $Org | Should -Not -Be $Null
             $Org.Name | Should -Be "Default"
+        }
+
+        It "Sets AnsibleTower on orgs" {
+            $Org = Get-AnsibleOrganization -Name Default
+            $Org.AnsibleTower | Should -Not -Be $null
         }
 
         It "Gets the admin user" {
