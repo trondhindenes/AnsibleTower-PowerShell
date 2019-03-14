@@ -1,12 +1,15 @@
-function Get-AnsibleOrganization
-{
-    [CmdletBinding()]
+function Get-AnsibleOrganization {
+    [CmdletBinding(DefaultParameterSetname='PropertyFilter')]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
     Param (
+        [Parameter(ParameterSetName='PropertyFilter')]
         [String]$Name,
 
-        [Parameter(ValueFromPipelineByPropertyName=$true)]
+        [Parameter(ValueFromPipelineByPropertyName=$true,ParameterSetName='ById')]
         [int]$id,
+
+        [Parameter(ParameterSetName='ById')]
+        [Switch]$UseCache,
 
         $AnsibleTower = $Global:DefaultAnsibleTower
     )
@@ -22,25 +25,37 @@ function Get-AnsibleOrganization
 
         if ($id)
         {
-            $Return = Invoke-GetAnsibleInternalJsonResult -ItemType "organizations" -Id $id -AnsibleTower $AnsibleTower
+            if($UseCache) {
+                $OrgKey = "organization/$id"
+                $Organization = $AnsibleTower.Cache.Get($OrgKey)
+            }
+            if($Organization) {
+                $Organization
+            } else {
+                Invoke-GetAnsibleInternalJsonResult -ItemType "organizations" -Id $id -AnsibleTower $AnsibleTower | ConvertToOrganization -AnsibleTower $AnsibleTower
+            }
         }
         Else
         {
-            $Return = Invoke-GetAnsibleInternalJsonResult -ItemType "organizations" -AnsibleTower $AnsibleTower -Filter $Filter
+            Invoke-GetAnsibleInternalJsonResult -ItemType "organizations" -AnsibleTower $AnsibleTower -Filter $Filter | ConvertToOrganization -AnsibleTower $AnsibleTower
         }
+    }
+}
 
-        if (!($Return))
-        {
-            #Nothing returned from the call
-            Return
-        }
-        foreach ($jsonorg in $return)
-        {
-            #Shift back to json and let newtonsoft parse it to a strongly named object instead
-            $jsonorgstring = $jsonorg | ConvertTo-Json
-            $org = $JsonParsers.ParseToOrganization($jsonorgstring)
-            Write-Output $org
-            $org = $null
-        }
+function ConvertToOrganization {
+    param(
+        [Parameter(ValueFromPipeline=$true,Mandatory=$true)]
+        $InputObject,
+
+        [Parameter(Mandatory=$true)]
+        $AnsibleTower
+    )
+    process {
+        $JsonString = ConvertTo-Json $InputObject
+        $AnsibleObject = $JsonParsers.ParseToOrganization($JsonString)
+        $AnsibleObject.AnsibleTower = $AnsibleTower
+        $CacheKey = "organization/$($AnsibleObject.Id)"
+        $AnsibleTower.Cache.Add($CacheKey, $AnsibleObject, $Script:CachePolicy)
+        $AnsibleObject
     }
 }

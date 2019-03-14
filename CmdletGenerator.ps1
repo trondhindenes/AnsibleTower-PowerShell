@@ -149,8 +149,11 @@ function New-NewCmdlet {
 
         $ExtraPropertyInfo
     )
-    _Function "$Verb-$Noun" -Description $Description {
+    _Function "$Verb-$Noun" -Description $Description -SupportsShouldProcess {
         $SchemaParameters = $Schema.Actions.Post | Get-Member -MemberType Properties
+
+        $NameMap = @{}
+        $Lookups = @()
 
         $SchemaParameters | ForEach-Object {
             $PSName = ToCamlCase $_.Name
@@ -166,8 +169,34 @@ function New-NewCmdlet {
                 }
             }
 
+            if($SchemaParameter.Required) {
+                $ExtraProperties["Mandatory"] = $true
+            }
+
+            if($Type -eq "Object") {
+                $Lookups += AnsibleObjectIdLookup -Class "AnsibleTower.$PSName" -InputParameterName $PSName -OutputParameterName "${PSName}Id"
+                $NameMap[$SchemaName] = "${PSName}Id"
+            } else {
+                $NameMap[$SchemaName] = $PSName
+            }
+
             _Parameter $PSName -Type $Type -HelpText $SchemaParameter.Help_Text @ExtraProperties
-            _Parameter -Name "AnsibleTower" -DefaultValue '$Global:DefaultAnsibleTower' -HelpText "The Ansible Tower instance to run against.  If no value is passed the command will run against `$Global:DefaultAnsibleTower."
+        }
+        _Parameter -Name "AnsibleTower" -DefaultValue '$Global:DefaultAnsibleTower' -HelpText "The Ansible Tower instance to run against.  If no value is passed the command will run against `$Global:DefaultAnsibleTower."
+
+        _End {
+            if($Lookups) {
+                $Lookups -join "`n"
+            }
+
+            $ObjectTable = $NameMap.Keys | ForEach-Object {
+                "$_ = `$$($NameMap[$_])"
+            }
+            _$ NewObject ("@{`n$($ObjectTable -join "`n")`n}`n")
+
+            _if { "`$PSCmdlet.ShouldProcess(`$AnsibleTower, `"Create $SchemaType `$(`$NewObject.Name)`")" } {
+                _ Invoke-PostAnsibleInternalJsonResult -ItemType $SchemaType -InputObject (_$ NewObject) -AnsibleTower (_$ AnsibleTower) ">" (_$ Null)
+            }
         }
     }
 }
@@ -291,6 +320,37 @@ function MapType {
             "String"
         }
     }
+}
+
+function AnsibleObjectIdLookup {
+    param(
+        $Class,
+        $InputParameterName,
+        $OutputParameterName
+    )
+    $ClassObjectName = $Class.Split(".")[1]
+    $GetCommand = "Get-Ansible$ClassObjectName"
+
+@"
+`$$OutputParameterName = `$null
+if(`$PSBoundParameters.ContainsKey("$InputParameterName")) {
+    switch(`$$InputParameterName.GetType().Fullname) {
+        "$Class" {
+            `$$OutputParameterName = `$$InputParameterName.Id
+        }
+        "System.Int32" {
+            `$$OutputParameterName = `$$InputParameterName
+        }
+        "System.String" {
+            `$$OutputParameterName = ($GetCommand -Name `$$InputParameterName -AnsibleTower `$AnsibleTower).Id
+        }
+        default {
+            Write-Error "Unknown type passed as -$InputParameterName (`$_).  Suppored values are String, Int32, and $Class." -ErrorAction Stop
+            return
+        }
+    }
+}
+"@
 }
 
 function AnsibleGetFilter {
@@ -528,4 +588,54 @@ $SetProject = @{
     Description = "Updates an existing project in Ansible Tower."
 }
 New-SchemaCmdlet @SetProject
+#>
+
+<#
+$NewTeam = @{
+    Type = "teams"
+    Verb = "New"
+    Noun = "AnsibleTeam"
+    Class = "AnsibleTower.Team"
+    ExtraPropertyInfo = @{
+        Name = @{ Position = 1};
+        Organization = @{ Position = 2}
+        Description = @{ Position = 3}
+    }
+    ExcludeProperties = @("type")
+    Description = "Creates a new team in Ansible Tower."
+}
+New-SchemaCmdlet @NewTeam
+#>
+
+<#
+$GetRole = @{
+    Type = "roles"
+    Verb = "Get"
+    Noun = "AnsibleRole"
+    Class = "AnsibleTower.Role"
+    ExtraPropertyInfo = @{
+        Name = @{ Position = 1};
+        Description = @{ Position = 2}
+    }
+    ExcludeProperties = @("type")
+    Description = "Gets roles defined in Ansible Tower."
+}
+New-SchemaCmdlet @GetRole
+#>
+
+<#
+$GetTeam = @{
+    Type = "teams"
+    Verb = "Get"
+    Noun = "AnsibleTeam"
+    Class = "AnsibleTower.Team"
+    ExtraPropertyInfo = @{
+        Name = @{ Position = 1};
+        Description = @{ Position = 2}
+        Organization = @{ Position = 3}
+    }
+    ExcludeProperties = @("type")
+    Description = "Gets teams defined in Ansible Tower."
+}
+New-SchemaCmdlet @GetTeam
 #>

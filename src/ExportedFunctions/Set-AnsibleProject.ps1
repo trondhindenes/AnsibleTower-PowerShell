@@ -49,6 +49,10 @@ The Ansible Tower instance to run against.  If no value is passed the command wi
 #>
 function Set-AnsibleProject {
     [CmdletBinding(SupportsShouldProcess=$True)]
+    [OutputType([AnsibleTower.Project])]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingPlainTextForPassword', '')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUsePSCredentialType', '')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
     param(
         [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true,ParameterSetName='ById')]
         [Int32]$Id,

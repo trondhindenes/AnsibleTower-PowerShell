@@ -20,6 +20,10 @@ Get-ChildItem "*.ps1" -path $PSScriptRoot | Where-Object {$_.Name -notmatch "tes
 Get-ChildItem "*.ps1" -Path $PSScriptRoot/InternalFunctions | Where-Object {$_.Name -notmatch "tests"} |  ForEach-Object { . $_.FullName }
 Get-ChildItem "*.ps1" -Path $PSScriptRoot/ExportedFunctions | Where-Object {$_.Name -notmatch "tests"} |  ForEach-Object { . $_.FullName }
 
+Add-Type -AssemblyName System.Runtime.Caching
+$Script:CachePolicy = New-Object System.Runtime.Caching.CacheItemPolicy -Property @{
+    SlidingExpiration = [System.Timespan]"0:02:00"
+}
 
 function Disable-CertificateVerification
 {
@@ -139,7 +143,7 @@ function Invoke-GetAnsibleInternalJsonResult
     }
 
     Write-Verbose ("Invoke-GetAnsibleInternalJsonResult: Invoking url [{0}]" -f $ItemApiUrl);
-    $invokeResult = Invoke-AnsibleRequest -FullPath $ItemApiUrl -AnsibleTower $AnsibleTower -QueryParameters $Filter
+#    $invokeResult = Invoke-AnsibleRequest -FullPath $ItemApiUrl -AnsibleTower $AnsibleTower -QueryParameters $Filter
     do {
         $invokeResult = Invoke-AnsibleRequest -FullPath $ItemApiUrl -AnsibleTower $AnsibleTower -QueryParameters $Filter
         if ($invokeResult.id) {

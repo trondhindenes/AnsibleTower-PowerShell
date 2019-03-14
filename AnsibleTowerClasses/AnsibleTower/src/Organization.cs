@@ -18,5 +18,9 @@ namespace AnsibleTower
         public string name { get; set; }
         public string description { get; set; }
         public Tower AnsibleTower { get; set; }
+
+        public override string ToString() {
+            return this.name;
+        }
     }
 }
