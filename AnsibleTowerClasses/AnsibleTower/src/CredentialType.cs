@@ -18,6 +18,7 @@ namespace AnsibleTower
         public bool managed_by_tower { get; set; }
         //public string inputs { get; set; }
         //public string injectors { get; set; }
+        [JsonIgnore]
         public Tower AnsibleTower { get; set; }
     }
 }

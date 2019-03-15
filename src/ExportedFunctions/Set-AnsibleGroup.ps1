@@ -1,5 +1,6 @@
 function Set-AnsibleGroup {
     [CmdletBinding(SupportsShouldProcess=$true)]
+    [OutputType([AnsibleTower.Group])]
     param(
         [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
         $Group,

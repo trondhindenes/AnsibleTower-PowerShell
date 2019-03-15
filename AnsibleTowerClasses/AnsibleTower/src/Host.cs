@@ -24,6 +24,7 @@ namespace AnsibleTower
         public int? last_job { get; set; }
         public int? last_job_host_summary { get; set; }
         public List<Group> groups { get; set; }
+        [JsonIgnore]
         public Tower AnsibleTower { get; set; }
     }
 }

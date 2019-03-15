@@ -25,6 +25,7 @@ namespace AnsibleTower
         public int total_groups { get; set; }
         public int groups_with_active_failures { get; set; }
         public bool has_inventory_sources { get; set; }
+        [JsonIgnore]
         public Tower AnsibleTower { get; set; }
     }
 }

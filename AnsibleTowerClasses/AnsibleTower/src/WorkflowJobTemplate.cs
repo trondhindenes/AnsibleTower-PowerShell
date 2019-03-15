@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 namespace AnsibleTower
 {
     public class WorkflowJobTemplate : IAnsibleObject {
+        [JsonIgnore]
         public Tower AnsibleTower { get; set; }
         public bool allow_simultaneous { get; set; }
         public bool ask_inventory_on_launch { get; set; }

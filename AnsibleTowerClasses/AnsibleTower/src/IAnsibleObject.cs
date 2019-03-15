@@ -10,6 +10,7 @@ namespace AnsibleTower
         int id { get; set; }
         string type { get; set; }
         string url { get; set; }
+        [JsonIgnore]
         Tower AnsibleTower { get; set; }
     }
 }

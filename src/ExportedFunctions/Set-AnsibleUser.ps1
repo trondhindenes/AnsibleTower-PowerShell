@@ -1,55 +1,109 @@
-Function Set-AnsibleUser
-{
+<#
+.DESCRIPTION
+Updates an existing user in Ansible Tower.
+
+.PARAMETER Id
+The ID of the  to update
+
+.PARAMETER InputObject
+The object to update
+
+.PARAMETER IsSuperuser
+Designates that this user has all permissions without explicitly assigning them.
+
+.PARAMETER Password
+Write-only field used to change the password.
+
+.PARAMETER Username
+Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+
+.PARAMETER PassThru
+Outputs the updated objects to the pipeline.
+
+.PARAMETER AnsibleTower
+The Ansible Tower instance to run against.  If no value is passed the command will run against $Global:DefaultAnsibleTower.
+#>
+function Set-AnsibleUser {
+    [CmdletBinding(SupportsShouldProcess=$True)]
+    [OutputType([AnsibleTower.User])]
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingUserNameAndPassWordParams', '')]
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingPlainTextForPassword', '')]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
-    [CmdletBinding(SupportsShouldProcess=$true)]
-    Param (
-        [Parameter(ValueFromPipelineByPropertyName=$true,Mandatory=$true,ParameterSetName="ById")]
-        [int32]$Id,
+    param(
+        [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true,ParameterSetName='ById')]
+        [Int32]$Id,
 
-        [Parameter(ValueFromPipeline=$true,Mandatory=$true,ParameterSetName="ByObject")]
-        [AnsibleTower.User]$User,
+        [Parameter(Mandatory=$true,ValueFromPipeline=$true,ParameterSetName='ByObject')]
+        [AnsibleTower.User]$InputObject,
 
-        $UserName,
+        [Parameter(Position=4)]
+        [String]$Email,
 
-        $FirstName,
+        [Parameter(Position=2)]
+        [String]$FirstName,
 
-        $LastName,
+        [switch]$IsSuperuser,
 
-        $Email,
+        [switch]$IsSystemAuditor,
 
-        [bool]$SuperUser,
+        [Parameter(Position=3)]
+        [String]$LastName,
 
-        $Password,
+        [String]$Password,
 
-        [Parameter(ParameterSetName="ById")]
+        [Parameter(Position=1)]
+        [String]$Username,
+
+        [switch]$PassThru,
+
         $AnsibleTower = $Global:DefaultAnsibleTower
     )
-    process {
+    Process {
         if($Id) {
-            $ThisUser = Get-AnsibleUser -Id $Id -AnsibleTower $AnsibleTower
+            $ThisObject = Get-AnsibleUser -Id $Id -AnsibleTower $AnsibleTower
         } else {
-            $AnsibleTower = $User.AnsibleTower
+            $AnsibleTower = $InputObject.AnsibleTower
             # Get a new instance to avoid modifing the passed in user object
-            $ThisUser = Get-AnsibleUser -Id $User.Id -AnsibleTower $AnsibleTower
+            $ThisObject = Get-AnsibleUser -Id $InputObject.Id -AnsibleTower $AnsibleTower
         }
 
-        if ($UserName) {$ThisUser.username = $UserName}
-        if ($FirstName) {$ThisUser.first_name = $FirstName}
-        if ($LastName) {$ThisUser.last_name = $LastName}
-        if ($Email) {$ThisUser.email = $Email}
-        if ($SuperUser) {$ThisUser.is_superuser = $SuperUser}
-        if ($Password) {$ThisUser.password = $Password}
+        if($PSBoundParameters.ContainsKey('Email')) {
+            $ThisObject.email = $Email
+        }
 
-        if($PSCmdlet.ShouldProcess($AnsibleTower, "Update user $($ThisUser.Username)")) {
-            $result = Invoke-PutAnsibleInternalJsonResult -ItemType "users" -InputObject $ThisUser -AnsibleTower $AnsibleTower
-            if ($result)
-            {
-                $JsonString = $Result | ConvertTo-Json
-                $AnsibleObject = $JsonParsers.ParseToUser($JsonString)
+        if($PSBoundParameters.ContainsKey('FirstName')) {
+            $ThisObject.first_name = $FirstName
+        }
+
+        if($PSBoundParameters.ContainsKey('IsSuperuser')) {
+            $ThisObject.is_superuser = $IsSuperuser
+        }
+
+        if($PSBoundParameters.ContainsKey('IsSystemAuditor')) {
+            $ThisObject.is_system_auditor = $IsSystemAuditor
+        }
+
+        if($PSBoundParameters.ContainsKey('LastName')) {
+            $ThisObject.last_name = $LastName
+        }
+
+        if($PSBoundParameters.ContainsKey('Password')) {
+            $ThisObject.password = $Password
+        }
+
+        if($PSBoundParameters.ContainsKey('Username')) {
+            $ThisObject.username = $Username
+        }
+
+        if($PSCmdlet.ShouldProcess($AnsibleTower, "Update user $($ThisObject.Id)")) {
+            $Result = Invoke-PutAnsibleInternalJsonResult -ItemType users -InputObject $ThisObject -AnsibleTower $AnsibleTower
+            if($Result) {
+                $JsonString = ConvertTo-Json -InputObject $Result
+                $AnsibleObject = [AnsibleTower.JsonFunctions]::ParseToUser($JsonString)
                 $AnsibleObject.AnsibleTower = $AnsibleTower
-                Write-Output $AnsibleObject
+                if($PassThru) {
+                    $AnsibleObject
+                }
             }
         }
     }

@@ -21,6 +21,7 @@ namespace AnsibleTower
         public string ldap_dn { get; set; }
         public string external_account { get; set; }
         public DateTime created { get; set; }
+        [JsonIgnore]
         public Tower AnsibleTower { get; set; }
     }
 }

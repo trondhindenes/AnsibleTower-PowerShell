@@ -22,6 +22,7 @@ namespace AnsibleTower
         public string authorization_grant_type { get; set; }
         public bool skip_authorization { get; set; }
         public int organization { get; set; }
+        [JsonIgnore]
         public Tower AnsibleTower { get; set; }
     }
 }

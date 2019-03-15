@@ -33,7 +33,7 @@ Function New-AnsibleUser
         if ($ResultObject)
         {
             $JsonString = $ResultObject | ConvertTo-Json
-            $AnsibleObject = $JsonParsers.ParseToUser($JsonString)
+            $AnsibleObject = [AnsibleTower.JsonFunctions]::ParseToUser($JsonString)
             $AnsibleObject.AnsibleTower = $AnsibleTower
             Write-Output $AnsibleObject
         }

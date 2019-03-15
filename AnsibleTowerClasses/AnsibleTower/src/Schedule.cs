@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 namespace AnsibleTower
 {
     public class Schedule : IAnsibleObject {
+        [JsonIgnore]
         public Tower AnsibleTower { get; set; }
         public DateTime created { get; set; }
         public string description { get; set; }

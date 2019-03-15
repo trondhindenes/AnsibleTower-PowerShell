@@ -32,6 +32,7 @@ namespace AnsibleTower
         public int scm_update_cache_timeout { get; set; }
         public bool last_update_failed { get; set; }
         public string last_updated { get; set; }
+        [JsonIgnore]
         public Tower AnsibleTower { get; set; }
     }
 }

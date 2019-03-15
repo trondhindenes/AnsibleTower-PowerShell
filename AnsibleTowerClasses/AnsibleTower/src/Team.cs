@@ -16,6 +16,7 @@ namespace AnsibleTower
         public string name { get; set; }
         public string description { get; set; }
         public object organization { get; set; }
+        [JsonIgnore]
         public Tower AnsibleTower { get; set; }
     }
 }

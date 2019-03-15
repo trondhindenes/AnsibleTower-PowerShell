@@ -18,6 +18,7 @@ namespace AnsibleTower
         public int credential_type { get; set; }
         public Hashtable inputs { get; set; }
         public List<IAnsibleObject> Owners { get; set; }
+        [JsonIgnore]
         public Tower AnsibleTower { get; set; }
     }
 }

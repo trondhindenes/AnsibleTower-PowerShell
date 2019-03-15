@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 namespace AnsibleTower
 {
     public class WorkflowJob : IAnsibleObject {
+        [JsonIgnore]
         public Tower AnsibleTower { get; set; }
         public bool allow_simultaneous { get; set; }
         public DateTime created { get; set; }

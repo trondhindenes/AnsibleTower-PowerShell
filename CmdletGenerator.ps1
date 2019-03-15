@@ -68,7 +68,7 @@ function New-SetCmdlet {
         $ExtraPropertyInfo
     )
     Write-Debug "Available actions $($Schema.Actions)"
-    _Function "$Verb-$Noun" -Description $Description -SupportsShouldProcess {
+    _Function "$Verb-$Noun" -Description $Description -SupportsShouldProcess -OutputType "[$Class]" {
         $SchemaParameters = $Schema.Actions.Post | Get-Member -MemberType Properties
         Write-Debug "Availabel parameters $($SchemaParameters.Name)"
 
@@ -92,6 +92,7 @@ function New-SetCmdlet {
 
             _Parameter $PSName -Type $Type -HelpText $SchemaParameter.Help_Text @ExtraProperties
         }
+        _Parameter -Name "PassThru" -Type "switch" -HelpText "Outputs the updated objects to the pipeline."
         _Parameter -Name "AnsibleTower" -DefaultValue '$Global:DefaultAnsibleTower' -HelpText "The Ansible Tower instance to run against.  If no value is passed the command will run against `$Global:DefaultAnsibleTower."
 
         _process {
@@ -99,30 +100,30 @@ function New-SetCmdlet {
                 _$ ThisObject (_ "Get-$Noun" -Id (_$ Id) -AnsibleTower (_$ AnsibleTower))
             } {
                 _$ AnsibleTower (_$ InputObject.AnsibleTower)
-                PSLB
+                "# Get a new instance to avoid modifing the passed in user object"
                 _$ ThisObject (_ "Get-$Noun" -Id (_$ InputObject.Id) -AnsibleTower (_$ AnsibleTower))
             } -lb
 
             $SchemaParameters | ForEach-Object {
                 $PSName = ToCamlCase $_.Name
                 $SchemaName = $_.Name
-                _if {_$ $PSName} {
-                    _$ ThisObject.$SchemaName (_$ $PSName)
+                $SchemaParameter = $Schema.Actions.Post."$SchemaName"
+
+            _if {_$ "PSBoundParameters.ContainsKey('$PSName')"} {
+                    _$ "ThisObject.$SchemaName" (_$ $PSName)
                 } -lb
             }
 
             _if { "`$PSCmdlet.ShouldProcess(`$AnsibleTower, `"Update $SchemaType `$(`$ThisObject.Id)`")" } {
                 _$ Result (_ Invoke-PutAnsibleInternalJsonResult -ItemType "$SchemaType" -InputObject (_$ ThisObject) -AnsibleTower (_$ AnsibleTower))
-                PSLB
                 _if { _$ Result } {
                     _$ JsonString (_ ConvertTo-Json -InputObject (_$ Result))
-                    PSLB
                     $ClassName = $Class.Split(".")[1]
                     _$ AnsibleObject "[AnsibleTower.JsonFunctions]::ParseTo${ClassName}(`$JsonString)"
-                    PSLB
                     _$ AnsibleObject.AnsibleTower (_$ AnsibleTower)
-                    PSLB
-                    _$ AnsibleObject
+                    _if { _$ PassThru } {
+                        _$ AnsibleObject
+                    }
                 }
             }
         }
@@ -591,6 +592,41 @@ New-SchemaCmdlet @SetProject
 #>
 
 <#
+$SetInventory = @{
+    Type = "inventories"
+    Verb = "Set"
+    Noun = "AnsibleInventory"
+    Class = "AnsibleTower.Inventory"
+    ExtraPropertyInfo = @{
+        Name = @{ Position = 1};
+        Description = @{ Position = 2}
+        Organization = @{ Position = 3}
+    }
+    ExcludeProperties = @("type")
+    Description = "Updates an existing inventory in Ansible Tower."
+}
+New-SchemaCmdlet @SetInventory
+#>
+
+<#
+$SetUser = @{
+    #Type = "users"
+    Verb = "Set"
+    Noun = "AnsibleUser"
+    Class = "AnsibleTower.User"
+    ExtraPropertyInfo = @{
+        UserName = @{ Position = 1};
+        FirstName = @{ Position = 2};
+        LastName = @{ Position = 3};
+        Email = @{ Position = 4};
+    }
+    ExcludeProperties = @("type")
+    Description = "Updates an existing user in Ansible Tower."
+}
+New-SchemaCmdlet @SetUser
+#>
+
+<#
 $NewTeam = @{
     Type = "teams"
     Verb = "New"
@@ -638,4 +674,22 @@ $GetTeam = @{
     Description = "Gets teams defined in Ansible Tower."
 }
 New-SchemaCmdlet @GetTeam
+#>
+
+<#
+$GetUser = @{
+    Type = "users"
+    Verb = "Get"
+    Noun = "AnsibleUser"
+    Class = "AnsibleTower.User"
+    ExtraPropertyInfo = @{
+        Username = @{ Position = 1};
+        Email = @{ Position = 2};
+        FirstName = @{ Position = 3};
+        LastName = @{ Position = 4};
+    }
+    ExcludeProperties = @("type")
+    Description = "Gets users defined in Ansible Tower."
+}
+New-SchemaCmdlet @GetUser
 #>

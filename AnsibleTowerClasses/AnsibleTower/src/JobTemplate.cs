@@ -27,6 +27,7 @@ namespace AnsibleTower
         public string job_tags { get; set; }
         public string host_config_key { get; set; }
         public bool ask_variables_on_launch { get; set; }
+        [JsonIgnore]
         public Tower AnsibleTower { get; set; }
     }
 }

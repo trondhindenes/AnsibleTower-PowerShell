@@ -14,7 +14,7 @@ namespace AnsibleTower
             return ConvertedObject;
         }
 
-        public AnsibleTower.User ParseToUser(string JsonString)
+        public static AnsibleTower.User ParseToUser(string JsonString)
         {
 
             AnsibleTower.User ConvertedObject = JsonConvert.DeserializeObject<AnsibleTower.User>(JsonString);

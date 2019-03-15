@@ -15,6 +15,7 @@ namespace AnsibleTower
         public string description { get; set; }
         public string resource_type { get; set; }
         public string resource_name { get; set; }
+        [JsonIgnore]
         public Tower AnsibleTower { get; set; }
     }
 }

@@ -17,6 +17,7 @@ namespace AnsibleTower
         public DateTime modified { get; set; }
         public string name { get; set; }
         public string description { get; set; }
+        [JsonIgnore]
         public Tower AnsibleTower { get; set; }
 
         public override string ToString() {

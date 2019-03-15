@@ -198,8 +198,13 @@ Function Invoke-PostAnsibleInternalJsonResult
 Function Invoke-PutAnsibleInternalJsonResult
 {
     Param (
+        [Parameter(mandatory=$true)]
         $ItemType,
+
+        [Parameter(mandatory=$true)]
         $InputObject,
+
+        [Parameter(mandatory=$true)]
         $AnsibleTower
     )
 
@@ -216,8 +221,8 @@ Function Invoke-PutAnsibleInternalJsonResult
     $Request = @{
         FullPath = $ItemApiUrl
         Method = "PUT"
-        Body = ($InputObject | ConvertTo-Json -Depth 99)
-        AnsibleTower = $InputObject.AnsibleTower
+        Body = [Newtonsoft.Json.JsonConvert]::SerializeObject($InputObject)
+        AnsibleTower = $AnsibleTower
     }
     return Invoke-AnsibleRequest @Request
 }

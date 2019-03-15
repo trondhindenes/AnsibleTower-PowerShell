@@ -44,13 +44,16 @@ The location where the project is stored.
 .PARAMETER Timeout
 The amount of time (in seconds) to run before the task is canceled.
 
+.PARAMETER PassThru
+Outputs the updated objects to the pipeline.
+
 .PARAMETER AnsibleTower
 The Ansible Tower instance to run against.  If no value is passed the command will run against $Global:DefaultAnsibleTower.
 #>
 function Set-AnsibleProject {
     [CmdletBinding(SupportsShouldProcess=$True)]
     [OutputType([AnsibleTower.Project])]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingPlainTextForPassword', '')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingPlainTextForPassword', 'Credential')]
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUsePSCredentialType', '')]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
     param(
@@ -90,6 +93,8 @@ function Set-AnsibleProject {
 
         [Int32]$Timeout,
 
+        [switch]$PassThru,
+
         $AnsibleTower = $Global:DefaultAnsibleTower
     )
     Process {
@@ -100,69 +105,101 @@ function Set-AnsibleProject {
             $ThisObject = Get-AnsibleProject -Id $InputObject.Id -AnsibleTower $AnsibleTower
         }
 
-        if($Credential) {
-            $ThisObject.credential = $Credential
+        if($PSBoundParameters.ContainsKey('Credential')) {
+            switch($Credential.GetType().Fullname) {
+                "System.Int32" {
+                    $CredentialId = $Credential
+                }
+                "System.String" {
+                    $CredentialId = (Get-AnsibleCredential -Name $Credential -AnsibleTower $AnsibleTower).Id
+                }
+                "AnsibleTower.Credential" {
+                    $CredentialId = $Credential.id
+                }
+                default {
+                    Write-Error "Unknown type passed as -Credential ($_).  Supported values are String, Int32, and AnsibleTower.Credential."
+                    return
+                }
+            }
+            $ThisObject.credential = $CredentialId
         }
 
-        if($CustomVirtualenv) {
+        if($PSBoundParameters.ContainsKey('CustomVirtualenv')) {
             $ThisObject.custom_virtualenv = $CustomVirtualenv
         }
 
-        if($Description) {
+        if($PSBoundParameters.ContainsKey('Description')) {
             $ThisObject.description = $Description
         }
 
-        if($LocalPath) {
+        if($PSBoundParameters.ContainsKey('LocalPath')) {
             $ThisObject.local_path = $LocalPath
         }
 
-        if($Name) {
+        if($PSBoundParameters.ContainsKey('Name')) {
             $ThisObject.name = $Name
         }
 
-        if($Organization) {
-            $ThisObject.organization = $Organization
+        if($PSBoundParameters.ContainsKey('Organization')) {
+            switch($Organization.GetType().Fullname) {
+                "System.Int32" {
+                    $OrganizationId = $Organization
+                }
+                "System.String" {
+                    $OrganizationId = (Get-AnsibleOrganization -Name $Organization -AnsibleTower $AnsibleTower).Id
+                }
+                "AnsibleTower.Organization" {
+                    $OrganizationId = $Organization.id
+                }
+                default {
+                    Write-Error "Unknown type passed as -Organization ($_).  Supported values are String, Int32, and AnsibleTower.Organization."
+                    return
+                }
+            }
+            $ThisObject.organization = $OrganizationId
         }
 
-        if($ScmBranch) {
+        if($PSBoundParameters.ContainsKey('ScmBranch')) {
             $ThisObject.scm_branch = $ScmBranch
         }
 
-        if($ScmClean) {
+        if($PSBoundParameters.ContainsKey('ScmClean')) {
             $ThisObject.scm_clean = $ScmClean
         }
 
-        if($ScmDeleteOnUpdate) {
+        if($PSBoundParameters.ContainsKey('ScmDeleteOnUpdate')) {
             $ThisObject.scm_delete_on_update = $ScmDeleteOnUpdate
         }
 
-        if($ScmType) {
+        if($PSBoundParameters.ContainsKey('ScmType')) {
             $ThisObject.scm_type = $ScmType
         }
 
-        if($ScmUpdateCacheTimeout) {
+        if($PSBoundParameters.ContainsKey('ScmUpdateCacheTimeout')) {
             $ThisObject.scm_update_cache_timeout = $ScmUpdateCacheTimeout
         }
 
-        if($ScmUpdateOnLaunch) {
+        if($PSBoundParameters.ContainsKey('ScmUpdateOnLaunch')) {
             $ThisObject.scm_update_on_launch = $ScmUpdateOnLaunch
         }
 
-        if($ScmUrl) {
+        if($PSBoundParameters.ContainsKey('ScmUrl')) {
             $ThisObject.scm_url = $ScmUrl
         }
 
-        if($Timeout) {
+        if($PSBoundParameters.ContainsKey('Timeout')) {
             $ThisObject.timeout = $Timeout
         }
 
         if($PSCmdlet.ShouldProcess($AnsibleTower, "Update projects $($ThisObject.Id)")) {
             $Result = Invoke-PutAnsibleInternalJsonResult -ItemType projects -InputObject $ThisObject -AnsibleTower $AnsibleTower
-             if($Result) {
+            if($Result) {
                 $JsonString = ConvertTo-Json -InputObject $Result
                 $AnsibleObject = [AnsibleTower.JsonFunctions]::ParseToProject($JsonString)
                 $AnsibleObject.AnsibleTower = $AnsibleTower
-                $AnsibleObject
+                if($PassThru) {
+                    $AnsibleObject
+                }
             }
         }
     }

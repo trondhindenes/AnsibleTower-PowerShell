@@ -12,7 +12,7 @@ function Test-AnsibleTower {
             if (!$meResult -or !$meResult.results) {
                 throw "Could not authenticate to Tower";
             }
-            $AnsibleTower.Me = $JsonParsers.ParseToUser((ConvertTo-Json ($meResult.results | Select-Object -First 1)));
+            $AnsibleTower.Me = [AnsibleTower.JsonFunctions]::ParseToUser((ConvertTo-Json ($meResult.results | Select-Object -First 1)));
         }
     }
     $AnsibleTower.Me

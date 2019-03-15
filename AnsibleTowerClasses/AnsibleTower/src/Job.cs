@@ -8,6 +8,7 @@ namespace AnsibleTower
 {
     public class Job : IAnsibleObject
     {
+        [JsonIgnore]
         public Tower AnsibleTower { get; set; }
         public string controller_node { get; set; }
         public DateTime created { get; set; }
