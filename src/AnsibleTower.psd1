@@ -99,6 +99,7 @@ FunctionsToExport = @(
     'New-AnsibleUser',
     'Register-AnsibleTower',
     'Remove-AnsibleHost',
+    'Revoke-AnsibleRole',
     'Set-AnsibleGroup',
     'Set-AnsibleProject',
     'Set-AnsibleUser',
