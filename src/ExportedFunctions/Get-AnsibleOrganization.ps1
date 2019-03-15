@@ -55,7 +55,7 @@ function ConvertToOrganization {
         $AnsibleObject = $JsonParsers.ParseToOrganization($JsonString)
         $AnsibleObject.AnsibleTower = $AnsibleTower
         $CacheKey = "organization/$($AnsibleObject.Id)"
-        $AnsibleTower.Cache.Add($CacheKey, $AnsibleObject, $Script:CachePolicy)
+        $AnsibleTower.Cache.Add($CacheKey, $AnsibleObject, $Script:CachePolicy) > $null
         $AnsibleObject
     }
 }
