@@ -3,6 +3,8 @@ skip_tags: true
 image:
   - ubuntu1804
   - Visual Studio 2017
+matrix:
+  fast_finish: true
 init:
 - ps:
 - sh: export PATH=/home/appveyor/.local/bin:$PATH
