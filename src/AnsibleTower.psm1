@@ -256,6 +256,7 @@ function Connect-AnsibleTower
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
     param (
         [Parameter(Mandatory=$true)]
+        [System.Management.Automation.Credential()]
         [System.Management.Automation.PSCredential]$Credential,
 
         [Parameter(Mandatory=$true)]

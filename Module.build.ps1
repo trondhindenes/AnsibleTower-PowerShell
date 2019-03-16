@@ -313,7 +313,7 @@ Task Install Build, BuildHelp, GenerateFileCatalog, {
     "Module installed into $InstallPath"
 }
 
-Task Test -If (Get-Module Pester -ListAvailable) Build,{
+Task Test -If (Get-Module Pester -ListAvailable) {
     Import-Module Pester
 
     try {
@@ -323,14 +323,12 @@ Task Test -If (Get-Module Pester -ListAvailable) Build,{
             $testing = @{
                 OutputFile   = $TestOutputFile
                 OutputFormat = $TestOutputFormat
-                ExcludeTag = $ExcludeTestTags
                 PassThru     = $true
                 Verbose      = $VerbosePreference
             }
         }
         else {
             $testing = @{
-                ExcludeTag = $ExcludeTestTags
                 PassThru     = $true
                 Verbose      = $VerbosePreference
             }
@@ -359,7 +357,7 @@ Task Test -If (Get-Module Pester -ListAvailable) Build,{
     }
 }
 
-Task Publish Build, Test, BuildHelp, GenerateFileCatalog, {
+Task Publish BuildHelp, GenerateFileCatalog, {
     $publishParams = @{
         Path        = $ModuleOutDir
         NuGetApiKey = $NuGetApiKey

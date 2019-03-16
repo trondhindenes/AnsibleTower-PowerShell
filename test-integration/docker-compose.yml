@@ -9,7 +9,7 @@ services:
       - memcached
       - postgres
     ports:
-      - 8052:8052
+      - 8052
     hostname: awxweb
     user: root
     restart: unless-stopped
@@ -31,7 +31,7 @@ services:
       MEMCACHED_HOST: memcached
       MEMCACHED_PORT: 11211
       AWX_ADMIN_USER: admin
-      AWX_ADMIN_PASSWORD: 7db2d013-21e5-45a1-b242-4e5e07c1b33a
+      AWX_ADMIN_PASSWORD: ${AWX_PASSWORD:-7db2d013-21e5-45a1-b242-4e5e07c1b33a}
 
   task:
     image: ansible/awx_task:${AWX_TASK_VERSION:-latest}
