@@ -6,7 +6,11 @@ image:
 matrix:
   fast_finish: true
 init:
-- ps:
+- ps: |
+    "APPVEYOR_REPO_BRANCH = $env:APPVEYOR_REPO_BRANCH"
+    "APPVEYOR_PULL_REQUEST_NUMBER = $env:APPVEYOR_PULL_REQUEST_NUMBER"
+    "APPVEYOR_REPO_COMMIT_MESSAGE = $env:APPVEYOR_REPO_COMMIT_MESSAGE"
+    "OS = $env:OS"
 - sh: export PATH=/home/appveyor/.local/bin:$PATH
 environment:
   POWERSHELL_TELEMETRY_OPTOUT: 1
