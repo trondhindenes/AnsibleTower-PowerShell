@@ -14,7 +14,7 @@ function DockerComposeUp {
     )
     pushd $Path
     try {
-        docker-compose -f $ComposeFile -p $ProjectName up --detach
+        docker-compose -f $ComposeFile -p $ProjectName up --quiet-pull --detach > $null
         $WebContainer = "${ProjectName}_web_1".ToLower()
         $NetworkName = "${ProjectName}_default".ToLower()
         $Container = docker inspect $WebContainer | ConvertFrom-Json
