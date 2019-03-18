@@ -1,3 +1,27 @@
+<#
+.DESCRIPTION
+Adds hosts or groups to groups in an Ansible inventory.
+
+.PARAMETER Group
+The name, id, or group object of a group.  If using the name and it is not unique, you must
+specify an inventory by prepending the inventory name to the group name (eg 'inventory/group') or
+using the -Inventory parameter.
+
+.PARAMETER Hosts
+A list of hosts to add to the specified group.  This can be the host name, id, or host object.
+The hosts must already be defined in the same inventory as the target group.
+
+.PARAMETER ChildGroups
+A list of groups to add to the specified group.  This can be the group name, id, or group object.
+The groups must already be defined in the same inventory as the target group.
+
+.PARAMETER Inventory
+The inventory to operate on if the target group is not unique.  This is only needed when specifing
+-Group as a non-unique name.
+
+.PARAMETER AnsibleTower
+The Ansible Tower instance to run against.  If no value is passed the command will run against $Global:DefaultAnsibleTower.
+#>
 function Add-AnsibleGroupmember {
     [CmdletBinding(SupportsShouldProcess=$true)]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
