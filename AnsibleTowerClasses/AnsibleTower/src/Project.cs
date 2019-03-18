@@ -34,5 +34,8 @@ namespace AnsibleTower
         public string last_updated { get; set; }
         [JsonIgnore]
         public Tower AnsibleTower { get; set; }
+        public override string ToString() {
+            return this.name;
+        }
     }
 }

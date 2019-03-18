@@ -627,6 +627,23 @@ New-SchemaCmdlet @SetUser
 #>
 
 <#
+$SetHost = @{
+    Type = "hosts"
+    Verb = "Set"
+    Noun = "AnsibleHost"
+    Class = "AnsibleTower.Host"
+    ExtraPropertyInfo = @{
+        Name = @{ Position = 1 }
+        Description = @{ Position = 2 }
+        Variables = @{ Position = 3 }
+    }
+    ExcludeProperties = @("type","inventory")
+    Description = "Updates an existing host in Ansible Tower."
+}
+New-SchemaCmdlet @SetHost
+#>
+
+<#
 $NewTeam = @{
     Type = "teams"
     Verb = "New"
@@ -708,4 +725,22 @@ $GetGroup = @{
     Description = "Gets groups defined in Ansible Tower."
 }
 New-SchemaCmdlet @GetGroup
+#>
+
+<#
+$GetJobTemplate = @{
+    Type = "job_templates"
+    Verb = "Get"
+    Noun = "AnsibleJobTemplate"
+    Class = "AnsibleTower.JobTemplate"
+    ExtraPropertyInfo = @{
+        Name = @{ Position = 1};
+        Project = @{ Position = 2};
+        Inventory = @{ Position = 3};
+        Playbook = @{ Position = 4};
+    }
+    ExcludeProperties = @("type")
+    Description = "Gets job templates defined in Ansible Tower."
+}
+New-SchemaCmdlet @GetJobTemplate
 #>

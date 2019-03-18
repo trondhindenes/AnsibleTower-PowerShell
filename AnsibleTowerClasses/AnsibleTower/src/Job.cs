@@ -24,7 +24,7 @@ namespace AnsibleTower
         public object inventory { get; set; }
         public string job_explanation { get; set; }
         public string job_tags { get; set; }
-        public int job_template { get; set; }
+        public object job_template { get; set; }
         public string job_type { get; set; }
         public string launch_type { get; set; }
         public string limit { get; set; }

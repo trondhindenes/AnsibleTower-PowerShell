@@ -20,5 +20,8 @@ namespace AnsibleTower
         public List<IAnsibleObject> Owners { get; set; }
         [JsonIgnore]
         public Tower AnsibleTower { get; set; }
+        public override string ToString() {
+            return this.name;
+        }
     }
 }
