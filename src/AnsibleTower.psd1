@@ -100,6 +100,7 @@ FunctionsToExport = @(
     'Register-AnsibleTower',
     'Remove-AnsibleHost',
     'Revoke-AnsibleRole',
+    'Set-AnsibleCredential',
     'Set-AnsibleGroup',
     'Set-AnsibleHost',
     'Set-AnsibleInventory',

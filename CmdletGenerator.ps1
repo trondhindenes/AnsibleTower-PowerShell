@@ -644,6 +644,23 @@ New-SchemaCmdlet @SetHost
 #>
 
 <#
+$SetCredential = @{
+    Type = "credentials"
+    Verb = "Set"
+    Noun = "AnsibleCredential"
+    Class = "AnsibleTower.Credential"
+    ExtraPropertyInfo = @{
+        Name = @{ Position = 1 }
+        Description = @{ Position = 2 }
+        Variables = @{ Position = 3 }
+    }
+    ExcludeProperties = @("type")
+    Description = "Updates an existing credential in Ansible Tower."
+}
+New-SchemaCmdlet @SetCredential
+#>
+
+<#
 $NewTeam = @{
     Type = "teams"
     Verb = "New"
