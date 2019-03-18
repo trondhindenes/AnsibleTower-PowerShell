@@ -5,17 +5,18 @@ function Add-RelatedObject {
         $RelatedType,
         $RelationProperty,
         $RelationCommand,
-        [Hashtable]$Cache = @{},
         [Switch]$PassThru
     )
     $Relations = Invoke-GetAnsibleInternalJsonResult -ItemType $ItemType -Id $InputObject.Id -ItemSubItem $RelatedType -AnsibleTower $InputObject.AnsibleTower
     foreach($Relation in $Relations) {
-        Write-Debug "Adding $RelatedType $($Relation.Id) to $ItemType $($InputObject.Id)"
+        Write-Debug "[Add-RelatedObject] Adding $RelatedType $($Relation.Id) to $ItemType $($InputObject.Id)"
         $RelationKey = "$RelatedType/$($Relation.Id)"
         $RelatedObject = $InputObject.AnsibleTower.Cache.Get($RelationKey)
         if(!$RelatedObject) {
+            Write-Debug "[Add-RelatedObject] Looking up $($Relation.Id) using $($RelationCommand)"
             $RelatedObject = &$RelationCommand -Id $Relation.Id -AnsibleTower $InputObject.AnsibleTower
-            $InputObject.AnsibleTower.Cache.Add($RelationKey, $RelatedObject, $Script:CachePolicy)
+            Write-Debug "[Add-RelatedObject] Caching $($RelatedObject.Url) as $RelationKey"
+            $InputObject.AnsibleTower.Cache.Add($RelationKey, $RelatedObject, $Script:CachePolicy) > $null
         }
         if(!$InputObject."$RelationProperty") {
             $InputObject."$RelationProperty" = $RelatedObject
