@@ -328,6 +328,15 @@ function Get-AnsibleJob {
             $JsonString = $ResultObject | ConvertTo-Json
             $AnsibleObject = [AnsibleTower.JsonFunctions]::ParseTojob($JsonString)
             $AnsibleObject.AnsibleTower = $AnsibleTower
+            if($AnsibleObject.Inventory) {
+                $AnsibleObject.Inventory = Get-AnsibleInventory -Id $AnsibleObject.Inventory -AnsibleTower $AnsibleTower -UseCache
+            }
+            if($AnsibleObject.Project) {
+                $AnsibleObject.Project = Get-AnsibleProject -Id $AnsibleObject.Project -AnsibleTower $AnsibleTower #-UseCache
+            }
+            if($AnsibleObject.job_template) {
+                $AnsibleObject.job_template = Get-AnsibleJobTemplate -Id $AnsibleObject.job_template -AnsibleTower $AnsibleTower #-UseCache
+            }
             Write-Output $AnsibleObject
             $AnsibleObject = $Null
         }

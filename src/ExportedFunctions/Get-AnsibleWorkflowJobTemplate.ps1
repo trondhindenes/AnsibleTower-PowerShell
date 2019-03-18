@@ -20,6 +20,7 @@ The Ansible Tower instance to run against.  If no value is passed the command wi
 function Get-AnsibleWorkflowJobTemplate {
     [CmdletBinding(DefaultParameterSetname='PropertyFilter')]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
+    [OutputType([AnsibleTower.WorkflowJobTemplate])]
     param(
         [Parameter(ParameterSetName='PropertyFilter')]
         [switch]$AllowSimultaneous,
@@ -163,7 +164,17 @@ function Get-AnsibleWorkflowJobTemplate {
             $JsonString = $ResultObject | ConvertTo-Json
             $AnsibleObject = [AnsibleTower.JsonFunctions]::ParseToWorkflowJobTemplate($JsonString)
             $AnsibleObject.AnsibleTower = $AnsibleTower
-            Write-Output $AnsibleObject
+            $CacheKey = "workflow_job_templates/$($AnsibleObject.Id)"
+            Write-Debug "[Get-AnsibleWorkflowJobTemplate] Caching $($AnsibleObject.Url) as $CacheKey"
+            $AnsibleTower.Cache.Add($CacheKey, $AnsibleObject, $Script:CachePolicy) > $null
+            #Add to cache before filling in child objects to prevent recursive loop
+            if($AnsibleObject.Inventory) {
+                $AnsibleObject.Inventory = Get-AnsibleInventory -Id $AnsibleObject.Inventory -AnsibleTower $AnsibleTower -UseCache
+            }
+            if($AnsibleObject.Organization) {
+                $AnsibleObject.Organization = Get-AnsibleOrganization -Id $AnsibleObject.Organization -AnsibleTower $AnsibleTower -UseCache
+            }
+            $AnsibleObject
             $AnsibleObject = $Null
         }
     }

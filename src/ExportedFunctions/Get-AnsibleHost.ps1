@@ -145,6 +145,10 @@ function Get-AnsibleHost {
             $JsonString = $ResultObject | ConvertTo-Json
             $AnsibleObject = [AnsibleTower.JsonFunctions]::ParseTohost($JsonString)
             $AnsibleObject.AnsibleTower = $AnsibleTower
+            $CacheKey = "hosts/$($AnsibleObject.Id)"
+            Write-Debug "[Get-AnsibleHost] Caching $($AnsibleObject.Url) as $CacheKey"
+            $AnsibleTower.Cache.Add($CacheKey, $AnsibleObject, $Script:CachePolicy) > $null
+            #Add to cache before filling in child objects to prevent recursive loop
             $AnsibleObject = Add-RelatedObject -InputObject $AnsibleObject -ItemType "hosts" -RelatedType "groups" -RelationProperty "Groups" -RelationCommand (Get-Command Get-AnsibleGroup) -PassThru
             Write-Output $AnsibleObject
             $AnsibleObject = $Null
