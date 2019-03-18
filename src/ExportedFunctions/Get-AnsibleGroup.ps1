@@ -1,14 +1,19 @@
 function Get-AnsibleGroup
 {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetname='PropertyFilter')]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
     Param (
+        [Parameter(Position=1,ParameterSetName='PropertyFilter')]
         [String]$Name,
 
+        [Parameter(ParameterSetName='PropertyFilter')]
         $Inventory,
 
-        [Parameter(ValueFromPipelineByPropertyName=$true)]
+        [Parameter(ValueFromPipelineByPropertyName=$true,ParameterSetName='ById')]
         [int]$id,
+
+        [Parameter(ParameterSetName='ById')]
+        [Switch]$UseCache,
 
         $AnsibleTower = $Global:DefaultAnsibleTower
     )
@@ -38,29 +43,43 @@ function Get-AnsibleGroup
         }
     }
 
+#    $AnsibleObject = $null
     if ($id)
     {
-        $Return = Invoke-GetAnsibleInternalJsonResult -ItemType "groups" -Id $id -AnsibleTower $AnsibleTower
+        $CacheKey = "groups/$id"
+        $AnsibleObject = $AnsibleTower.Cache.Get($CacheKey)
+        if($UseCache -and $AnsibleObject) {
+            Write-Debug "[Get-AnsibleGroup] Returning $($AnsibleObject.Url) from cache"
+            $AnsibleObject
+        } else {
+            Invoke-GetAnsibleInternalJsonResult -ItemType "groups" -Id $id -AnsibleTower $AnsibleTower | ConvertToGroup -AnsibleTower $AnsibleTower
+        }
     }
     Else
     {
-        $Return = Invoke-GetAnsibleInternalJsonResult -ItemType "groups" -AnsibleTower $AnsibleTower -Filter $Filter
+        Invoke-GetAnsibleInternalJsonResult -ItemType "groups" -AnsibleTower $AnsibleTower -Filter $Filter | ConvertToGroup -AnsibleTower $AnsibleTower
     }
+}
 
-    if (!($Return))
-    {
-        #Nothing returned from the call
-        Return
-    }
+function ConvertToGroup {
+    param(
+        [Parameter(ValueFromPipeline=$true,Mandatory=$true)]
+        $InputObject,
 
-    foreach ($jsongroup in $return)
-    {
-        #Shift back to json and let newtonsoft parse it to a strongly named object instead
-        $jsongroupstring = $jsongroup | ConvertTo-Json
-        $group = $JsonParsers.ParseToGroup($jsongroupstring)
-        $Group.AnsibleTower = $AnsibleTower
-        $Group.Variables = Get-ObjectVariableData $Group
-        Write-Output $Group
-        $group = $null
+        [Parameter(Mandatory=$true)]
+        $AnsibleTower
+    )
+    process {
+        $JsonString = ConvertTo-Json $InputObject
+        $AnsibleObject = $JsonParsers.ParseToGroup($JsonString)
+        $AnsibleObject.AnsibleTower = $AnsibleTower
+        $CacheKey = "groups/$($AnsibleObject.Id)"
+        Write-Debug "[Get-AnsibleGroup] Caching $($AnsibleObject.Url) as $CacheKey"
+        $AnsibleTower.Cache.Add($CacheKey, $AnsibleObject, $Script:CachePolicy) > $null
+        #Add to cache before filling in child objects to prevent recursive loop
+        $AnsibleObject.Variables = Get-ObjectVariableData $AnsibleObject
+        $AnsibleObject.Inventory = Get-AnsibleInventory -Id $AnsibleObject.Inventory -AnsibleTower $AnsibleTower -UseCache
+        Write-Debug "[Get-AnsibleGroup] Returning $($AnsibleObject.Url)"
+        $AnsibleObject
     }
 }

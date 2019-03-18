@@ -15,7 +15,7 @@ namespace AnsibleTower
         public DateTime modified { get; set; }
         public string name { get; set; }
         public string description { get; set; }
-        public int inventory { get; set; }
+        public object inventory { get; set; }
         //public string variables { get; set; }
         [JsonIgnore()]
         public Hashtable variables { get; set; }
