@@ -19,14 +19,15 @@ function Add-AnsibleGroupmember {
         $InventoryParam = @{}
         if($Inventory) {
             $InventoryParam["Inventory"] = $Inventory
-        } elseif($Group.Contains("/")) {
-            $InventoryParam["Inventory"],$Group = $Group.Split("/")
         }
         switch($Group.GetType().Fullname) {
             "AnsibleTower.Group" {
                 #do nothing
             }
             "System.String" {
+                if(!$Inventory -and $Group.Contains("/")) {
+                    $InventoryParam["Inventory"],$Group = $Group.Split("/")
+                }
                 $Group = Get-AnsibleGroup -Name $Group @InventoryParam -AnsibleTower $AnsibleTower
             }
             "System.Int32" {
@@ -34,15 +35,13 @@ function Add-AnsibleGroupmember {
             }
             default {
                 Write-Error "Unknown type passed as -Group ($_).  Suppored values are String, Int32, and AnsibleTower.Group." -ErrorAction Stop
-                break
             }
         }
-        if($Group.Count -gt 1) {
+        if($Group.Count -ne 1) {
             $GroupList = ($Group | ForEach-Object {
                 "$($_.Inventory.Name)/$($_.Name)"
             }) -Join ", "
-            Write-Error "Multiple target groups found: $GroupList"
-            break
+            Write-Error "Unable to resolve target group to a single group. Found: $GroupList" -ErrorAction Stop
         }
         if(!$InventoryParam.ContainsKey("inventory")) {
             $inventoryParam["Inventory"] = $Group.Inventory
