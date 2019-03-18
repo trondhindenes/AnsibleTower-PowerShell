@@ -77,6 +77,9 @@ function Get-AnsibleInventory {
         [Parameter(ValueFromPipelineByPropertyName=$true,ParameterSetName='ById')]
         [Int32]$Id,
 
+        [Parameter(ParameterSetName='ById')]
+        [Switch]$UseCache,
+
         $AnsibleTower = $Global:DefaultAnsibleTower
     )
     process {
@@ -170,21 +173,16 @@ function Get-AnsibleInventory {
         }
 
         if($id) {
-            $Return = Invoke-GetAnsibleInternalJsonResult -ItemType "inventory" -Id $Id -AnsibleTower $AnsibleTower
+            $CacheKey = "inventory/$Id"
+            $AnsibleObject = $AnsibleTower.Cache.Get($CacheKey)
+            if($UseCache -and $AnsibleObject) {
+                Write-Debug "[Get-AnsibleInventory] Returning $($AnsibleObject.Url) from cache"
+                $AnsibleObject
+            } else {
+                Invoke-GetAnsibleInternalJsonResult -ItemType "inventory" -Id $Id -AnsibleTower $AnsibleTower | ConvertToInventory -AnsibleTower $AnsibleTower
+            }
         } else {
-            $Return = Invoke-GetAnsibleInternalJsonResult -ItemType "inventory" -Filter $Filter -AnsibleTower $AnsibleTower
-        }
-
-        if(!($Return)) {
-            return
-        }
-        foreach($ResultObject in $Return) {
-            $JsonString = $ResultObject | ConvertTo-Json
-            $AnsibleObject = [AnsibleTower.JsonFunctions]::ParseToinventory($JsonString)
-            $AnsibleObject.AnsibleTower = $AnsibleTower
-            $AnsibleObject = AddInventoryGroups $AnsibleObject
-            Write-Output $AnsibleObject
-            $AnsibleObject = $Null
+            Invoke-GetAnsibleInternalJsonResult -ItemType "inventory" -Filter $Filter -AnsibleTower $AnsibleTower | ConvertToInventory -AnsibleTower $AnsibleTower
         }
     }
 }
@@ -196,8 +194,30 @@ function AddInventoryGroups {
     $Groups = Invoke-GetAnsibleInternalJsonResult -ItemType "inventory" -Id $Inventory.Id -ItemSubItem "groups" -AnsibleTower $Inventory.AnsibleTower
     $Inventory.Groups = New-Object "System.Collections.Generic.List[AnsibleTower.Group]"
     foreach($Group in $Groups) {
-        $GroupObj = Get-AnsibleGroup -Id $Group.Id -AnsibleTower $Inventory.AnsibleTower
+        $GroupObj = Get-AnsibleGroup -Id $Group.Id -AnsibleTower $Inventory.AnsibleTower -UseCache
         $Inventory.Groups.Add($GroupObj)
     }
     $Inventory
+}
+
+function ConvertToInventory {
+    param(
+        [Parameter(ValueFromPipeline=$true,Mandatory=$true)]
+        $InputObject,
+
+        [Parameter(Mandatory=$true)]
+        $AnsibleTower
+    )
+    process {
+        $JsonString = ConvertTo-Json $InputObject
+        $AnsibleObject = [AnsibleTower.JsonFunctions]::ParseToinventory($JsonString)
+        $AnsibleObject.AnsibleTower = $AnsibleTower
+        $CacheKey = "inventory/$($AnsibleObject.Id)"
+        Write-Debug "[Get-AnsibleInventory] Caching $($AnsibleObject.Url) as $CacheKey"
+        $AnsibleTower.Cache.Add($CacheKey, $AnsibleObject, $Script:CachePolicy) > $null
+        #Add to cache before filling in child objects to prevent recursive loop
+        $AnsibleObject = AddInventoryGroups $AnsibleObject
+        Write-Debug "[Get-AnsibleInventory] Returning $($AnsibleObject.Url)"
+        $AnsibleObject
+    }
 }
