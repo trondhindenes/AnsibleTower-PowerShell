@@ -51,7 +51,7 @@ function ConvertToOrganization {
     )
     process {
         $JsonString = ConvertTo-Json $InputObject
-        $AnsibleObject = $JsonParsers.ParseToOrganization($JsonString)
+        $AnsibleObject = [AnsibleTower.JsonFunctions]::ParseToOrganization($JsonString)
         $AnsibleObject.AnsibleTower = $AnsibleTower
         $CacheKey = "organization/$($AnsibleObject.Id)"
         Write-Debug "[Get-AnsibleOrganization] Caching $($AnsibleObject.Url) as $CacheKey"

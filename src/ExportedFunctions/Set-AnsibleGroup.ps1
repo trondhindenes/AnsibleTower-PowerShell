@@ -37,7 +37,7 @@ function Set-AnsibleGroup {
         if($PSCmdlet.ShouldProcess($AnsibleTower.ToString(), "Update properties on group $($Group.Name)")) {
             $Result = Invoke-AnsibleRequest -Method PATCH -FullPath $Group.Url -AnsibleTower $AnsibleTower -Body $Body
             $JsonString = $Result | ConvertTo-Json
-            $Group = $JsonParsers.ParseToGroup($JsonString)
+            $Group = [AnsibleTower.JsonFunctions]::ParseToGroup($JsonString)
             $Group.Variables = [AnsibleTower.JsonFunctions]::ParseToHashtable($Result.Variables)
             $Group.AnsibleTower = $AnsibleTower
         }

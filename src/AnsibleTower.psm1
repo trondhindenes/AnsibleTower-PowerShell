@@ -11,11 +11,7 @@ if($PSVersionTable["PSEdition"] -eq "Core") {
 }
 Add-Type -Path $DllPath
 
-# Load the json parsers to have it handy whenever.
-[System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-$JsonParsers = New-Object AnsibleTower.JsonFunctions
-
-#D ot-source/Load the other powershell scripts
+#Dot-source/Load the other powershell scripts
 Get-ChildItem "*.ps1" -path $PSScriptRoot | Where-Object {$_.Name -notmatch "tests|Build|Default"} |  ForEach-Object { . $_.FullName }
 Get-ChildItem "*.ps1" -Path $PSScriptRoot/InternalFunctions | Where-Object {$_.Name -notmatch "tests"} |  ForEach-Object { . $_.FullName }
 Get-ChildItem "*.ps1" -Path $PSScriptRoot/ExportedFunctions | Where-Object {$_.Name -notmatch "tests"} |  ForEach-Object { . $_.FullName }

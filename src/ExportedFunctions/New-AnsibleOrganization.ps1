@@ -21,7 +21,7 @@ Function New-AnsibleOrganization
         if ($ResultObject)
         {
             $JsonString = $ResultObject | ConvertTo-Json
-            $AnsibleObject = $JsonParsers.ParseToOrganization($JsonString)
+            $AnsibleObject = [AnsibleTower.JsonFunctions]::ParseToOrganization($JsonString)
             $AnsibleObject.AnsibleTower = $AnsibleTower
             Write-Output $AnsibleObject
         }

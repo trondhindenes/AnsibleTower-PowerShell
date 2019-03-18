@@ -693,3 +693,19 @@ $GetUser = @{
 }
 New-SchemaCmdlet @GetUser
 #>
+
+<#
+$GetGroup = @{
+    Type = "groups"
+    Verb = "Get"
+    Noun = "AnsibleGroup"
+    Class = "AnsibleTower.Group"
+    ExtraPropertyInfo = @{
+        Name = @{ Position = 1};
+        Inventory = @{ Position = 2};
+    }
+    ExcludeProperties = @("type")
+    Description = "Gets groups defined in Ansible Tower."
+}
+New-SchemaCmdlet @GetGroup
+#>

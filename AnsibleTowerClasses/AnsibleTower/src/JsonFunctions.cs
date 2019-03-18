@@ -8,7 +8,7 @@ namespace AnsibleTower
 {
     public class JsonFunctions
     {
-        public AnsibleTower.Organization ParseToOrganization(string JsonString)
+        public static AnsibleTower.Organization ParseToOrganization(string JsonString)
         {
             AnsibleTower.Organization ConvertedObject = JsonConvert.DeserializeObject<AnsibleTower.Organization>(JsonString);
             return ConvertedObject;
@@ -21,7 +21,7 @@ namespace AnsibleTower
             return ConvertedObject;
         }
 
-        public AnsibleTower.JobTemplate ParseToJobTemplate(string JsonString)
+        public static AnsibleTower.JobTemplate ParseToJobTemplate(string JsonString)
         {
             AnsibleTower.JobTemplate ConvertedObject = JsonConvert.DeserializeObject<AnsibleTower.JobTemplate>(JsonString);
             return ConvertedObject;
@@ -49,7 +49,7 @@ namespace AnsibleTower
             return ConvertedObject;
         }
 
-        public AnsibleTower.Group ParseToGroup(string JsonString)
+        public static AnsibleTower.Group ParseToGroup(string JsonString)
         {
             AnsibleTower.Group ConvertedObject = JsonConvert.DeserializeObject<AnsibleTower.Group>(JsonString);
             return ConvertedObject;

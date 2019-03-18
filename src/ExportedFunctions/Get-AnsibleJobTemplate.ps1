@@ -62,7 +62,7 @@ function Get-AnsibleJobTemplate
         {
             # Shift back to json and let newtonsoft parse it to a strongly named object instead
             $JsonString = $ResultObject | ConvertTo-Json
-            $AnsibleObject = $JsonParsers.ParseToJobTemplate($JsonString)
+            $AnsibleObject = [AnsibleTower.JsonFunctions]::ParseToJobTemplate($JsonString)
             $AnsibleObject.AnsibleTower = $AnsibleTower
             Write-Output $AnsibleObject
             $AnsibleObject = $null
