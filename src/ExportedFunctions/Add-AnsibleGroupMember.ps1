@@ -67,7 +67,7 @@ function Add-AnsibleGroupmember {
                     }
                 }
                 if(!$ThisHost) {
-                    Write-Error "Unable to locate host by '$_'"
+                    Write-Error "Unable to locate host '$_' in inventory '$($InventoryParam['Inventory'])'"
                     return
                 }
                 $HostGroupUrl = Join-AnsibleUrl $ThisHost.Url, 'groups'
@@ -99,7 +99,7 @@ function Add-AnsibleGroupmember {
                     }
                 }
                 if(!$ThisGroup) {
-                    Write-Error "Unable to locate child group by '$_'"
+                    Write-Error "Unable to locate child group '$_' in inventory '$($InventoryParam['Inventory'])'"
                     return
                 }
                 $GroupChildrenUrl = Join-AnsibleUrl $ThisGroup.Url, 'children'
