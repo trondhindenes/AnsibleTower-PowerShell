@@ -54,9 +54,6 @@ function Get-AnsibleHost {
 
         $AnsibleTower = $Global:DefaultAnsibleTower
     )
-    begin {
-        $GroupCache = @{}
-    }
     process {
         $Filter = @{}
         if($PSBoundParameters.ContainsKey("Description")) {
@@ -148,7 +145,7 @@ function Get-AnsibleHost {
             $JsonString = $ResultObject | ConvertTo-Json
             $AnsibleObject = [AnsibleTower.JsonFunctions]::ParseTohost($JsonString)
             $AnsibleObject.AnsibleTower = $AnsibleTower
-            $AnsibleObject = Add-RelatedObject -InputObject $AnsibleObject -ItemType "hosts" -RelatedType "groups" -RelationProperty "Groups" -RelationCommand (Get-Command Get-AnsibleGroup) -Cache $GroupCache -PassThru
+            $AnsibleObject = Add-RelatedObject -InputObject $AnsibleObject -ItemType "hosts" -RelatedType "groups" -RelationProperty "Groups" -RelationCommand (Get-Command Get-AnsibleGroup) -PassThru
             Write-Output $AnsibleObject
             $AnsibleObject = $Null
         }
