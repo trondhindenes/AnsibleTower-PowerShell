@@ -678,6 +678,22 @@ New-SchemaCmdlet @NewTeam
 #>
 
 <#
+$NewOrganization = @{
+    Type = "organizations"
+    Verb = "New"
+    Noun = "AnsibleOrganization"
+    Class = "AnsibleTower.Organization"
+    ExtraPropertyInfo = @{
+        Name = @{ Position = 1};
+        Description = @{ Position = 2}
+    }
+    ExcludeProperties = @("type")
+    Description = "Creates a new organization in Ansible Tower."
+}
+New-SchemaCmdlet @NewOrganization
+#>
+
+<#
 $GetRole = @{
     Type = "roles"
     Verb = "Get"

@@ -1,29 +1,41 @@
-Function New-AnsibleOrganization
-{
-    [CmdletBinding(SupportsShouldProcess=$true)]
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
-    Param (
-        [Parameter(Mandatory=$true)]
-        $Name,
+<#
+.DESCRIPTION
+Creates a new organization in Ansible Tower.
 
-        $Description,
+.PARAMETER CustomVirtualenv
+Local absolute file path containing a custom Python virtualenv to use
+
+.PARAMETER Description
+Optional description of this organization.
+
+.PARAMETER Name
+Name of this organization.
+
+.PARAMETER AnsibleTower
+The Ansible Tower instance to run against.  If no value is passed the command will run against $Global:DefaultAnsibleTower.
+#>
+function New-AnsibleOrganization {
+    [CmdletBinding(SupportsShouldProcess=$True)]
+    param(
+        [String]$CustomVirtualenv,
+
+        [Parameter(Position=2)]
+        [String]$Description,
+
+        [Parameter(Mandatory=$true,Position=1)]
+        [String]$Name,
 
         $AnsibleTower = $Global:DefaultAnsibleTower
     )
+    End {
+        $NewObject = @{
+            description = $Description
+            name = $Name
+            custom_virtualenv = $CustomVirtualenv
+        }
 
-    $NewOrg = @{
-        name = $Name
-        description = $Description
-    }
-
-    if($PSCmdlet.ShouldProcess($AnsibleTower, "Create organization $Name")) {
-        $ResultObject = Invoke-PostAnsibleInternalJsonResult -ItemType "organizations" -InputObject $NewOrg -AnsibleTower $AnsibleTower
-        if ($ResultObject)
-        {
-            $JsonString = $ResultObject | ConvertTo-Json
-            $AnsibleObject = [AnsibleTower.JsonFunctions]::ParseToOrganization($JsonString)
-            $AnsibleObject.AnsibleTower = $AnsibleTower
-            Write-Output $AnsibleObject
+        if($PSCmdlet.ShouldProcess($AnsibleTower, "Create organization $($NewObject.Name)")) {
+            Invoke-PostAnsibleInternalJsonResult -ItemType organizations -InputObject $NewObject -AnsibleTower $AnsibleTower > $Null
         }
     }
 }
