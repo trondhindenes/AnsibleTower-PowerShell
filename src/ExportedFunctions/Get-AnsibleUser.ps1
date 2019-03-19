@@ -16,6 +16,7 @@ The Ansible Tower instance to run against.  If no value is passed the command wi
 #>
 function Get-AnsibleUser {
     [CmdletBinding(DefaultParameterSetname='PropertyFilter')]
+    [OutputType([AnsibleTower.User])]
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
     param(
         [Parameter(Position=2,ParameterSetName='PropertyFilter')]
