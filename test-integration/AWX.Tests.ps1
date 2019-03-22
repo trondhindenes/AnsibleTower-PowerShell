@@ -128,7 +128,7 @@ function IntegrationTest {
             It "Set-AnsibleHost updates a host" {
                 $H = Get-AnsibleHost -Name localhost -Inventory "Demo Inventory"
                 $SetHost = $H | Set-AnsibleHost -Description "Updated by PowerShell" -PassThru
-                $SetHost.Inventory.Description | SHould -Be "Updated by PowerShell"
+                $SetHost.Description | SHould -Be "Updated by PowerShell"
             }
 
             It "Gets the demo job template" {
