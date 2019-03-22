@@ -139,7 +139,6 @@ function Invoke-GetAnsibleInternalJsonResult
         $ItemApiUrl = Join-AnsibleUrl $ItemApiUrl, $ItemSubItem
     }
 
-    $ReturnedResults = 0
     $RemainingResults = $MaxResults
 
     Write-Verbose ("Invoke-GetAnsibleInternalJsonResult: Invoking url [{0}]" -f $ItemApiUrl);
