@@ -109,6 +109,11 @@ function IntegrationTest {
                 $H.Name | Should -Be "localhost"
             }
 
+            It "Parses the host inventory property correctly" {
+                $H = Get-AnsibleHost -Name localhost -Inventory "Demo Inventory"
+                $H.Inventory.Name | Should -Be "Demo Inventory"
+            }
+
             It "Sets AnsibleTower on hosts" {
                 $H = Get-AnsibleHost -Name localhost -Inventory "Demo Inventory"
                 $H.AnsibleTower | Should -Not -Be $null
