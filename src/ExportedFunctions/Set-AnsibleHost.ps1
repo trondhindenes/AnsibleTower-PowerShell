@@ -95,6 +95,9 @@ function Set-AnsibleHost {
                 $CacheKey = "hosts/$($AnsibleObject.Id)"
                 $AnsibleTower.Cache.Remove($CacheKey) > $null
                 $AnsibleObject = Add-RelatedObject -InputObject $AnsibleObject -ItemType "hosts" -RelatedType "groups" -RelationProperty "Groups" -RelationCommand (Get-Command Get-AnsibleGroup) -PassThru
+                if($AnsibleObject.Inventory) {
+                    $AnsibleObject.Inventory = Get-AnsibleInventory -Id $AnsibleObject.Inventory -AnsibleTower $AnsibleTower -UseCache
+                }
                 if($PassThru) {
                     $AnsibleObject
                 }

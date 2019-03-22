@@ -174,9 +174,6 @@ function Get-AnsibleHost {
             if($AnsibleObject.Inventory) {
                 $AnsibleObject.Inventory = Get-AnsibleInventory -Id $AnsibleObject.Inventory -AnsibleTower $AnsibleTower -UseCache
             }
-            if($AnsibleObject.Variables) {
-                $AnsibleObject.Variables = Get-ObjectVariableData $AnsibleObject
-            }
             Write-Output $AnsibleObject
             $AnsibleObject = $Null
         }
