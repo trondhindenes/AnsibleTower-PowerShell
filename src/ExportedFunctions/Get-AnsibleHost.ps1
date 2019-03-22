@@ -113,7 +113,7 @@ function Get-AnsibleHost {
                     $Filter["groups__name"] = $Group
                 }
                 default {
-                    Write-Error "Unknown type passed as -Inventory ($_).  Suppored values are String, Int32, and AnsibleTower.Inventory." -ErrorAction Stop
+                    Write-Error "Unknown type passed as -Group ($_).  Suppored values are String, Int32, and AnsibleTower.Group." -ErrorAction Stop
                     return
                 }
             }
@@ -171,6 +171,12 @@ function Get-AnsibleHost {
             $AnsibleTower.Cache.Add($CacheKey, $AnsibleObject, $Script:CachePolicy) > $null
             #Add to cache before filling in child objects to prevent recursive loop
             $AnsibleObject = Add-RelatedObject -InputObject $AnsibleObject -ItemType "hosts" -RelatedType "groups" -RelationProperty "Groups" -RelationCommand (Get-Command Get-AnsibleGroup) -PassThru
+            if($AnsibleObject.Inventory) {
+                $AnsibleObject.Inventory = Get-AnsibleInventory -Id $AnsibleObject.Inventory -AnsibleTower $AnsibleTower -UseCache
+            }
+            if($AnsibleObject.Variables) {
+                $AnsibleObject.Variables = Get-ObjectVariableData $AnsibleObject
+            }
             Write-Output $AnsibleObject
             $AnsibleObject = $Null
         }

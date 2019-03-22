@@ -41,11 +41,7 @@ namespace AnsibleTower
 
         public static AnsibleTower.Host ParseToHost(string JsonString)
         {
-            JObject Json = JObject.Parse(JsonString);
-            JToken InventoryObject = Json["summary_fields"]["inventory"];
-            Json.Property("inventory").Remove();
-            Json.Add("inventory", InventoryObject);
-            AnsibleTower.Host ConvertedObject = JsonConvert.DeserializeObject<AnsibleTower.Host>(Json.ToString());
+            AnsibleTower.Host ConvertedObject = JsonConvert.DeserializeObject<AnsibleTower.Host>(JsonString.ToString());
             return ConvertedObject;
         }
 
