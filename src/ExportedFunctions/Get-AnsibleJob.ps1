@@ -23,6 +23,9 @@ Name of this job.
 .PARAMETER ScmRevision
 The SCM Revision from the Project used for this job, if available
 
+.PARAMETER MaxResults
+The maximum number of job objects to return from Ansible Tower.
+
 .PARAMETER Id
 The ID of a specific AnsibleJob to get
 
@@ -97,13 +100,17 @@ function Get-AnsibleJob {
         [ValidateSet(0,1,2,3,4,5)]
         [string]$Verbosity,
 
+        [Int32]$MaxResults = 1000,
+
         [Parameter(ValueFromPipelineByPropertyName=$true,ParameterSetName='ById')]
         [Int32]$Id,
 
         $AnsibleTower = $Global:DefaultAnsibleTower
     )
     process {
-        $Filter = @{}
+        $Filter = @{
+            order_by="-started"
+        }
 
         if($PSBoundParameters.ContainsKey("ControllerNode")) {
             if($ControllerNode.Contains("*")) {
@@ -316,9 +323,9 @@ function Get-AnsibleJob {
         }
 
         if($id) {
-            $Return = Invoke-GetAnsibleInternalJsonResult -ItemType "jobs" -Id $Id -AnsibleTower $AnsibleTower
+            $Return = Invoke-GetAnsibleInternalJsonResult -ItemType "jobs" -Id $Id -AnsibleTower $AnsibleTower -MaxResults $MaxResults
         } else {
-            $Return = Invoke-GetAnsibleInternalJsonResult -ItemType "jobs" -Filter $Filter -AnsibleTower $AnsibleTower
+            $Return = Invoke-GetAnsibleInternalJsonResult -ItemType "jobs" -Filter $Filter -AnsibleTower $AnsibleTower -MaxResults $MaxResults
         }
 
         if(!($Return)) {
@@ -332,10 +339,10 @@ function Get-AnsibleJob {
                 $AnsibleObject.Inventory = Get-AnsibleInventory -Id $AnsibleObject.Inventory -AnsibleTower $AnsibleTower -UseCache
             }
             if($AnsibleObject.Project) {
-                $AnsibleObject.Project = Get-AnsibleProject -Id $AnsibleObject.Project -AnsibleTower $AnsibleTower #-UseCache
+                $AnsibleObject.Project = Get-AnsibleProject -Id $AnsibleObject.Project -AnsibleTower $AnsibleTower -UseCache
             }
             if($AnsibleObject.job_template) {
-                $AnsibleObject.job_template = Get-AnsibleJobTemplate -Id $AnsibleObject.job_template -AnsibleTower $AnsibleTower #-UseCache
+                $AnsibleObject.job_template = Get-AnsibleJobTemplate -Id $AnsibleObject.job_template -AnsibleTower $AnsibleTower -UseCache
             }
             Write-Output $AnsibleObject
             $AnsibleObject = $Null

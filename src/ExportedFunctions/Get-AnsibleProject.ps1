@@ -98,6 +98,9 @@ function Get-AnsibleProject {
         [Parameter(ParameterSetName='ById')]
         [Int32]$Id,
 
+        [Parameter(ParameterSetName='ById')]
+        [Switch]$UseCache,
+
         [Object]$AnsibleTower = $Global:DefaultAnsibleTower
     )
     end {
@@ -227,7 +230,15 @@ function Get-AnsibleProject {
         }
 
         if($id) {
-            $Return = Invoke-GetAnsibleInternalJsonResult -ItemType "projects" -Id $Id -AnsibleTower $AnsibleTower
+            $CacheKey = "projects/$Id"
+            $AnsibleObject = $AnsibleTower.Cache.Get($CacheKey)
+            if($UseCache -and $AnsibleObject) {
+                Write-Debug "[Get-AnsibleProject] Returning $($AnsibleObject.Url) from cache"
+                $AnsibleObject
+                return
+            } else {
+                $Return = Invoke-GetAnsibleInternalJsonResult -ItemType "projects" -Id $Id -AnsibleTower $AnsibleTower
+            }
         } else {
             $Return = Invoke-GetAnsibleInternalJsonResult -ItemType "projects" -Filter $Filter -AnsibleTower $AnsibleTower
         }
@@ -238,8 +249,13 @@ function Get-AnsibleProject {
         foreach($ResultObject in $Return) {
             $JsonString = $ResultObject | ConvertTo-Json
             $AnsibleObject = [AnsibleTower.JsonFunctions]::ParseToproject($JsonString)
+            $CacheKey = "projects/$($AnsibleObject.Id)"
+            Write-Debug "[Get-AnsibleProject] Caching $($AnsibleObject.Url) as $CacheKey"
+            $AnsibleTower.Cache.Add($CacheKey, $AnsibleObject, $Script:CachePolicy) > $null
+            #Add to cache before filling in child objects to prevent recursive loop
             $AnsibleObject.AnsibleTower = $AnsibleTower
-            Write-Output $AnsibleObject
+            Write-Debug "[Get-AnsibleProject] Returning $($AnsibleObject.Url)"
+            $AnsibleObject
             $AnsibleObject = $Null
         }
     }

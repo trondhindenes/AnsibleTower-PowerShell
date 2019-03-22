@@ -119,6 +119,8 @@ function Invoke-GetAnsibleInternalJsonResult
 
         $Filter = @{},
 
+        [Int32]$MaxResults = [Int32]::MaxValue,
+
         $AnsibleTower = $Global:DefaultAnsibleTower
     )
 
@@ -137,20 +139,27 @@ function Invoke-GetAnsibleInternalJsonResult
         $ItemApiUrl = Join-AnsibleUrl $ItemApiUrl, $ItemSubItem
     }
 
+    $ReturnedResults = 0
+    $RemainingResults = $MaxResults
+
     Write-Verbose ("Invoke-GetAnsibleInternalJsonResult: Invoking url [{0}]" -f $ItemApiUrl);
 #    $invokeResult = Invoke-AnsibleRequest -FullPath $ItemApiUrl -AnsibleTower $AnsibleTower -QueryParameters $Filter
     do {
         $invokeResult = Invoke-AnsibleRequest -FullPath $ItemApiUrl -AnsibleTower $AnsibleTower -QueryParameters $Filter
         if ($invokeResult.id) {
             Write-Output $invokeResult
-        }
-        Elseif ($invokeResult.results) {
-            Write-Output $invokeResult.results
+        } elseif ($invokeResult.results) {
+            if($InvokeResult.Results.Count -gt $RemainingResults) {
+                $InvokeResult.Results | Select-Object -First $RemainingResults
+            } else {
+                $InvokeResult.Results
+            }
+            $RemainingResults -= $InvokeResult.Results.Count
         }
         $ItemApiUrl = $InvokeResult.Next
         #Don't add filter query string after the first run
         $Filter = @{}
-    } while($ItemApiUrl)
+    } while($ItemApiUrl -and $RemainingResults -gt 0)
 }
 
 Function Invoke-PostAnsibleInternalJsonResult

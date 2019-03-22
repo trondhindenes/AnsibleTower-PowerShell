@@ -127,6 +127,9 @@ function Get-AnsibleJobTemplate {
         [Parameter(ParameterSetName='ById')]
         [Int32]$Id,
 
+        [Parameter(ParameterSetName='ById')]
+        [Switch]$UseCache,
+
         $AnsibleTower = $Global:DefaultAnsibleTower
     )
     end {
@@ -336,7 +339,15 @@ function Get-AnsibleJobTemplate {
         }
 
         if($id) {
-            $Return = Invoke-GetAnsibleInternalJsonResult -ItemType "job_templates" -Id $Id -AnsibleTower $AnsibleTower
+            $CacheKey = "job_templates/$Id"
+            $AnsibleObject = $AnsibleTower.Cache.Get($CacheKey)
+            if($UseCache -and $AnsibleObject) {
+                Write-Debug "[Get-AnsibleJobTemplate] Returning $($AnsibleObject.Url) from cache"
+                $AnsibleObject
+                return
+            } else {
+                $Return = Invoke-GetAnsibleInternalJsonResult -ItemType "job_templates" -Id $Id -AnsibleTower $AnsibleTower
+            }
         } else {
             $Return = Invoke-GetAnsibleInternalJsonResult -ItemType "job_templates" -Filter $Filter -AnsibleTower $AnsibleTower
         }
@@ -356,10 +367,10 @@ function Get-AnsibleJobTemplate {
                 $AnsibleObject.Inventory = Get-AnsibleInventory -Id $AnsibleObject.Inventory -AnsibleTower $AnsibleTower -UseCache
             }
             if($AnsibleObject.Project) {
-                $AnsibleObject.Project = Get-AnsibleProject -Id $AnsibleObject.Project -AnsibleTower $AnsibleTower #-UseCache
+                $AnsibleObject.Project = Get-AnsibleProject -Id $AnsibleObject.Project -AnsibleTower $AnsibleTower -UseCache
             }
             if($AnsibleObject.Credential) {
-                $AnsibleObject.Credential = Get-AnsibleCredential -Id $AnsibleObject.Credential -AnsibleTower $AnsibleTower #-UseCache
+                $AnsibleObject.Credential = Get-AnsibleCredential -Id $AnsibleObject.Credential -AnsibleTower $AnsibleTower -UseCache
             }
             $AnsibleObject
             $AnsibleObject = $Null
