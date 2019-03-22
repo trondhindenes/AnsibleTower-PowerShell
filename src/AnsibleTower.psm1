@@ -2,7 +2,6 @@
 $script:TowerApiUrl = $null;
 $script:AnsibleCredential = $null;
 
-
 # Load Json
 if($PSVersionTable["PSEdition"] -eq "Core") {
     $DllPath  = join-path $PSScriptRoot "bin\netstandard2.0\AnsibleTower.dll"
