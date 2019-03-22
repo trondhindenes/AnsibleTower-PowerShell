@@ -40,7 +40,7 @@ function Get-AnsibleHost {
         [Parameter(Position=2,ParameterSetName='PropertyFilter')]
         [Object]$Inventory,
 
-        [Parameter(ParameterSetName='PropertyFilter')]
+        [Parameter(Position=3,ParameterSetName='PropertyFilter')]
         [Object]$Group,
 
         [Parameter(ParameterSetName='PropertyFilter')]
