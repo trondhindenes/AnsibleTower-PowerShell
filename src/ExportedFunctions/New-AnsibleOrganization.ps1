@@ -16,6 +16,7 @@ The Ansible Tower instance to run against.  If no value is passed the command wi
 #>
 function New-AnsibleOrganization {
     [CmdletBinding(SupportsShouldProcess=$True)]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidGlobalVars", "Global:DefaultAnsibleTower")]
     param(
         [String]$CustomVirtualenv,
 
