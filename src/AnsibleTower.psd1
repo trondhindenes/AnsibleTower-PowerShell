@@ -132,7 +132,7 @@ PrivateData = @{
         Prerelease = $null
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        Tags = @("Ansible","Configuration","Management")
+        Tags = @("Ansible","Configuration","Management","PSEdition_Desktop","PSEdition_Core","Linux","Windows")
 
         # A URL to the license for this module.
         # LicenseUri = ''
