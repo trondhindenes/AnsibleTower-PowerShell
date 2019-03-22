@@ -41,6 +41,9 @@ function Get-AnsibleHost {
         [Object]$Inventory,
 
         [Parameter(ParameterSetName='PropertyFilter')]
+        [Object]$Group,
+
+        [Parameter(ParameterSetName='PropertyFilter')]
         [Object]$LastJob,
 
         [Parameter(Position=1,ParameterSetName='PropertyFilter')]
@@ -93,6 +96,24 @@ function Get-AnsibleHost {
                 }
                 default {
                     Write-Error "Unknown type passed as -Inventory ($_).  Supported values are String, Int32, and AnsibleTower.Inventory." -ErrorAction Stop
+                    return
+                }
+            }
+        }
+
+        if($PSBoundParameters.ContainsKey("Group")) {
+            switch($Inventory.GetType().Fullname) {
+                "AnsibleTower.Group" {
+                    $Filter["groups__id"] = $Group.id
+                }
+                "System.Int32" {
+                    $Filter["group__id"] = $Group
+                }
+                "System.String" {
+                    $Filter["groups__name"] = $Group
+                }
+                default {
+                    Write-Error "Unknown type passed as -Inventory ($_).  Suppored values are String, Int32, and AnsibleTower.Inventory." -ErrorAction Stop
                     return
                 }
             }
