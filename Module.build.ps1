@@ -92,13 +92,21 @@ Task Analyze -if ($ScriptAnalysisEnabled) StageFiles, {
     if (!(Get-Module PSScriptAnalyzer -ListAvailable)) {
         "PSScriptAnalyzer module is not installed. Skipping $($psake.context.currentTaskName) task."
         return
-    } else {
-        Import-Module PSScriptAnalyzer
     }
 
     "ScriptAnalysisFailBuildOnSeverityLevel set to: $ScriptAnalysisFailBuildOnSeverityLevel"
 
-    $analysisResult = Invoke-ScriptAnalyzer -Path $ModuleOutDir -Settings $ScriptAnalyzerSettingsPath -Recurse -Verbose:$VerbosePreference
+    if($PSVersionTable["PSEdition"] -eq "core") {
+        $Exe = "pwsh"
+    } else {
+        $Exe = "powershell"
+    }
+    $AnalysisResult = &$Exe -Command {
+        param($ModuleOutdir, $ScriptAnalyzerSettingsPath, $VerbosePreference)
+        Import-Module PSScriptAnalyzer
+        Invoke-ScriptAnalyzer -Path $ModuleOutDir -Settings $ScriptAnalyzerSettingsPath -Recurse -Verbose:$VerbosePreference
+    } -args $ModuleOutDir, $ScriptAnalyzerSettingsPath, $VerbosePreference
+
     $analysisResult | Format-Table
     switch ($ScriptAnalysisFailBuildOnSeverityLevel) {
         'None' {
