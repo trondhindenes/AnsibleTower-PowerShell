@@ -64,6 +64,8 @@ function Wait-AnsibleJob
             $Id = $Job.Id
         }
 
+        $StartDate = Get-Date
+
         do {
             $Job = Get-AnsibleJob -Id $Id -AnsibleTower $AnsibleTower
             if(!$Job) {
