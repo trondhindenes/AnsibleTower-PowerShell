@@ -37,7 +37,7 @@ namespace AnsibleTower
         public DateTime? started { get; set; }
         public string status { get; set; }
         public string type { get; set; }
-        public int unified_job_template { get; set; }
+        public int? unified_job_template { get; set; }
         public string url { get; set; }
         //public object credential { get; set; }
         //public object cloud_credential { get; set; }
